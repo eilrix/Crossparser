@@ -1,6 +1,7 @@
 # Visual Studio 2015 user specific files
 .vs/
 temp/
+source/__pycache__/
 
 # Compiled Object files
 *.slo
@@ -81,3 +82,7 @@ Project/DerivedDataCache/
 node_modules/
 /patch.diff
 *.diff
+/patch.diff
+
+/debug.log
+

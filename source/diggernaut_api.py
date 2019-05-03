@@ -13,9 +13,12 @@ from PIL import Image
 import crossparser_tools
 
 
-#location of server folders (only data needed to change)
-#file_dir_loc = 'C:/Work/Cross/'
-file_dir_loc = crossparser_tools.file_dir_loc
+#location of server folders
+temp_folder = crossparser_tools.temp_folder
+config_folder = crossparser_tools.config_folder
+data_folder = crossparser_tools.data_folder
+
+
 
 #token of diggernaut api:
 token = "shi8z84yyfev2nkxfvox2r9189mshk5tfgi99wj0"
@@ -60,8 +63,8 @@ csv_out_data_counter = 0
 
 
 def parse_img_db():
-    if os.path.isfile(file_dir_loc + 'img_db'):
-        with open(file_dir_loc + 'img_db', 'r') as cr_file:
+    if os.path.isfile(data_folder + 'img_db'):
+        with open(data_folder + 'img_db', 'r') as cr_file:
             for line in cr_file:
                 if not line.strip().startswith('#'):
                     if line.strip():
@@ -70,7 +73,7 @@ def parse_img_db():
 
 
 def parse_websites():
-    with open(file_dir_loc + 'websites.txt', 'r') as cr_file:
+    with open(config_folder + 'websites.txt', 'r') as cr_file:
         for line in cr_file:
             if not line.strip().startswith('#'):
                 if line.strip():
@@ -78,7 +81,7 @@ def parse_websites():
                     websites[k.strip()] = v.strip()
 
 
-    with open(file_dir_loc + 'weblinks.txt', 'r') as cr_file:
+    with open(config_folder + 'weblinks.txt', 'r') as cr_file:
         for line in cr_file:
             if not line.strip().startswith('#'):
                 if line.strip():
@@ -90,7 +93,7 @@ def parse_websites():
 
 def parse_export_fields():
     i = 0
-    with open(file_dir_loc + 'export_fields.txt', 'r') as cr_file:
+    with open(config_folder + 'export_fields.txt', 'r') as cr_file:
         for line in cr_file:
             if not line.strip().startswith('#'):
                 if line.strip():
@@ -102,7 +105,7 @@ def parse_export_fields():
 
 
 def parse_categories():
-    with open(file_dir_loc + 'category_export.csv', 'r', newline='', encoding="utf8") as cat_file:
+    with open(temp_folder + 'category_export.csv', 'r', newline='', encoding="utf8") as cat_file:
         category_export = cat_file.readlines()
         category_export.pop(0)
         global categories_names
@@ -324,7 +327,7 @@ def add_new_category(cat_check_chain, parent_id, prod_image):
     categories_images.append(prod_image)
 
 
-    #with open(file_dir_loc + 'category_export.csv', 'a+', newline='', encoding="utf8") as cat_file:
+    #with open(temp_folder + 'category_export.csv', 'a+', newline='', encoding="utf8") as cat_file:
     #    cat_file.write(';'.join(row_out) + '\n')
 
 
@@ -343,9 +346,9 @@ def make_categories_csv():
 
     categs_for_menu = []
     categs_for_menu_urls = []
-    categs_filename = file_dir_loc + 'temp/category_export.csv'
+    categs_filename = temp_folder + 'category_export.csv'
 
-    with open(file_dir_loc + 'temp/files_categ_import.txt', 'w+', newline='', encoding="utf8") as files_toimport:
+    with open(temp_folder + 'files_categ_import.txt', 'w+', newline='', encoding="utf8") as files_toimport:
         files_toimport.write(categs_filename)
 
     with open(categs_filename, 'w+', newline='', encoding="utf8") as cat_file:
@@ -431,7 +434,7 @@ def make_categories_csv():
     #print(categs_for_menu)
 
     #make menu file for web-site
-    with open(file_dir_loc + 'category_menu.txt', 'w+', newline='', encoding="utf8") as cat_file:
+    with open(data_folder + 'category_menu.txt', 'w+', newline='', encoding="utf8") as cat_file:
         for cat in categs_for_menu:
             cat_file.write(';'.join(cat) + '$$')
 
@@ -709,7 +712,7 @@ def image_check(img):
 
         img_db[img] = 'catalog/product/' + img_name
 
-        with open(file_dir_loc + 'img_db', 'a+', newline='', encoding="utf8") as img_dbfile:
+        with open(data_folder + 'img_db', 'a+', newline='', encoding="utf8") as img_dbfile:
             img_dbfile.write(img + '$$' + 'catalog/product/' + img_name + '\n')
 
         img_counter_dowloaded += 1
@@ -726,7 +729,7 @@ def image_check(img):
 
 def make_csv(data, current_site):
 
-    filename = file_dir_loc + 'temp/' + current_site + '-' + digger_id + '-import.csv'
+    filename = temp_folder + current_site + '-' + digger_id + '-import.csv'
 
     with open(filename, 'w+', newline='', encoding="utf8") as csvexportfile:
 
@@ -751,7 +754,7 @@ def make_csv(data, current_site):
         crossparser_tools.write_to_log('Failed to make csv file of ' + current_site + '. No entries. Digger id: ' + digger_id)
         return
 
-    with open(file_dir_loc + 'temp/' + 'files_prod_import.txt', 'a', newline='', encoding="utf8") as files_toimport:
+    with open(temp_folder + 'files_prod_import.txt', 'a', newline='', encoding="utf8") as files_toimport:
         files_toimport.write(filename + '\n')
 
     crossparser_tools.write_to_log('Made csv file with ' + str(csv_out_data_counter) + ' items of ' + current_site 
@@ -821,8 +824,11 @@ def start_all_diggers():
 
 
 
-if not os.path.exists(file_dir_loc + 'temp'):
-    os.mkdir(file_dir_loc + 'temp')
+if not os.path.exists(temp_folder):
+    os.mkdir(temp_folder)
+
+if not os.path.exists(data_folder):
+    os.mkdir(data_folder)
 
 
 parse_export_fields()
@@ -834,9 +840,9 @@ website_root = credentials['website_root']
 
 
 #Clear import catalog files (files of files)
-with open( file_dir_loc + 'temp/' + 'files_prod_import.txt', 'w+', newline='', encoding="utf8") as files_toimport:
+with open(temp_folder + 'files_prod_import.txt', 'w+', newline='', encoding="utf8") as files_toimport:
     files_toimport.close()
-with open( file_dir_loc + 'temp/' + 'files_categ_import.txt', 'w+', newline='', encoding="utf8") as files_toimport:
+with open(temp_folder + 'files_categ_import.txt', 'w+', newline='', encoding="utf8") as files_toimport:
     files_toimport.close()
     
 
@@ -865,7 +871,6 @@ crossparser_tools.write_to_log('failed to download: ' + str(img_counter_failed_t
 
 import csvimport
 
-#execfile(file_dir_loc + "csvimport.py")
 
 
 

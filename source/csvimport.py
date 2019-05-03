@@ -15,15 +15,15 @@ import re, string, timeit
 import crossparser_tools
 
 
-
-file_dir_loc = crossparser_tools.file_dir_loc
+temp_folder = crossparser_tools.temp_folder
+config_folder = crossparser_tools.config_folder
 credentials = crossparser_tools.parse_credentials()
 
 products_files = []
 categs_files = []
 token = ''
-files_prod_import = file_dir_loc + 'temp/files_prod_import.txt'
-files_categ_import = file_dir_loc + 'temp/files_categ_import.txt'
+files_prod_import = temp_folder + 'files_prod_import.txt'
+files_categ_import = temp_folder + 'files_categ_import.txt'
 driver = ''
 
 
@@ -158,11 +158,11 @@ def import_files():
             options = webdriver.ChromeOptions()
 
             if credentials['is_server'] == 'no':
-                chromedriver_path = file_dir_loc + 'chromedriver.exe'
+                chromedriver_path = config_folder + 'chromedriver.exe'
                 options.add_argument('--window-size=1200,700')
 
             if credentials['is_server'] == 'yes':
-                chromedriver_path = file_dir_loc + 'chromedriver'
+                chromedriver_path = config_folder + 'chromedriver'
                 options.add_argument('--no-sandbox')
                 options.add_argument("--disable-dev-shm-usage");
                 options.add_argument('--headless')

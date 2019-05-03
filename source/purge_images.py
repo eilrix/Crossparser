@@ -4,7 +4,7 @@ import os.path
 import crossparser_tools
 
 
-file_dir_loc = crossparser_tools.file_dir_loc
+config_folder = crossparser_tools.config_folder
 
 credentials = crossparser_tools.parse_credentials()
 website_root = credentials['website_root']
@@ -19,4 +19,4 @@ os.mkdir(website_root + 'image/catalog/product')
 shutil.rmtree(website_root + 'image/cache/catalog/product')
 os.mkdir(website_root + 'image/cache/catalog/product')
 
-os.remove(file_dir_loc + 'img_db')
+os.remove(config_folder + 'img_db')

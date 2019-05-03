@@ -6,13 +6,28 @@ import datetime
 
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
+
+proj_root_dir = ''
+if '/' in dirpath:
+    proj_root_dir = dirpath.split('/')
+if '\\' in dirpath:
+    proj_root_dir = dirpath.split('\\')
+
+proj_root_dir = ('/').join(proj_root_dir[0 : -1]) + '/'
+
+
+temp_folder = proj_root_dir + 'temp/'
+config_folder = proj_root_dir + 'config/'
+data_folder = proj_root_dir + 'data/'
+
+
 file_dir_loc = dirpath + '/'
 
 
 def parse_credentials():
     credentials = {}
 
-    with open(file_dir_loc + 'credentials.txt', 'r') as cr_file:
+    with open(config_folder + 'credentials.txt', 'r') as cr_file:
         for line in cr_file:
             if not line.strip().startswith('#'):
                 if line.strip():
@@ -24,7 +39,7 @@ def parse_credentials():
 
 def write_to_log(text):
     print(text)
-    with open(file_dir_loc + 'temp/log.txt', 'a+') as cr_file:
+    with open(temp_folder + 'log.txt', 'a+') as cr_file:
         currentDT = datetime.datetime.now()
         #full_pattern = re.compile('[^a-zA-Z0-9]|-')
         #text = re.sub(full_pattern, ' ', text)

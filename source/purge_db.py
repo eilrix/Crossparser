@@ -6,14 +6,15 @@ import crossparser_tools
 
 
 credentials = crossparser_tools.parse_credentials()
-file_dir_loc = crossparser_tools.file_dir_loc
+temp_folder = crossparser_tools.temp_folder
+config_folder = crossparser_tools.config_folder
 
 sql_query = ''
 
 
 def parse_sql_query():
     global sql_query
-    with open(file_dir_loc + 'sql_truncate.txt', 'r') as cr_file:
+    with open(config_folder + 'sql_truncate.txt', 'r') as cr_file:
         for line in cr_file:
             line = line.split(' ')
             line[1] = credentials['php_db'] + '.' + line[1]
