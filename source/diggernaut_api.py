@@ -17,6 +17,8 @@ import crossparser_tools
 temp_folder = crossparser_tools.temp_folder
 config_folder = crossparser_tools.config_folder
 data_folder = crossparser_tools.data_folder
+img_folder = 'image/catalog/product/'
+img_module_folder = 'catalog/product/'
 
 
 
@@ -680,7 +682,7 @@ def image_check(img):
         img_name = to_seo_url(img_name).replace('-', '')
         img_name = img_name + '.jpg'
 
-        file_path = website_root + 'image/catalog/product/' + img_name
+        file_path = website_root + img_folder + img_name
         urllib.request.urlretrieve(img, file_path)
 
         size = os.stat(file_path).st_size
@@ -710,14 +712,14 @@ def image_check(img):
         #print('compression: ' , compression)
         #print('size out: ' , size)
 
-        img_db[img] = 'catalog/product/' + img_name
+        img_db[img] = img_module_folder + img_name
 
         with open(data_folder + 'img_db', 'a+', newline='', encoding="utf8") as img_dbfile:
-            img_dbfile.write(img + '$$' + 'catalog/product/' + img_name + '\n')
+            img_dbfile.write(img + '$$' + img_module_folder + img_name + '\n')
 
         img_counter_dowloaded += 1
 
-        return 'catalog/product/' + img_name
+        return img_module_folder + img_name
 
     except Exception as e: 
         print(e)
@@ -794,7 +796,8 @@ def get_nextlink_forsite(current_site):
     if links == '':
         return ''
 
-    links = links.split('||')
+    if len(links) > 1 :
+        links = links.split('||')
     link_to_parse = links[0]
 
     if len(links) == 1 :
@@ -817,11 +820,66 @@ def start_all_diggers():
 
         link_to_parse = get_nextlink_forsite(current_site)
 
-        crossparser_tools.write_to_log('start parsing: ', current_site, 'digger_id: ', digger_id)
+        crossparser_tools.write_to_log('start parsing: ' + current_site + 'digger_id: ' + digger_id)
 
         start_digger(digger_id, link_to_parse)
 
 
+def checking_all_diggers():
+    global current_site
+    global digger_id
+
+    is_done = True
+
+    for attr, value in websites.items():
+        digger_id = value
+        current_site = attr
+
+        session_info = check_status(digger_id, False)
+        if session_info['state'] == 'running':
+            is_done = False
+        else:
+            parse_session(session_info)
+
+            link_to_parse = get_nextlink_forsite(current_site)
+
+            if link_to_parse != '':
+                crossparser_tools.write_to_log('start parsing: ' + current_site + 'digger_id: ' + digger_id)
+                start_digger(digger_id, link_to_parse)
+                is_done = False
+
+
+    sleep(10)
+    if is_done == False:
+        checking_all_diggers()
+
+
+
+def parse_session(session_info):
+
+    if len(session_info) == 0:
+        crossparser_tools.write_to_log('Digger ' + str(digger_id) + ' doesnt respond properly')
+        return
+
+    session_id = session_info['id']
+    print('session_id:', session_id)
+
+    session_data = get_session_data(digger_id, session_id)
+    crossparser_tools.write_to_log('Successfully retrieved session ' + str(session_id) + ' data of digger ' + str(digger_id)
+                 + '. Items in session: ' + str(len(session_data)))
+
+    global items_counter_parsed
+    items_counter_parsed += len(session_data)
+    #print('session_data', len(session_data))
+
+
+    #parse_categories()
+    
+    make_csv(session_data, current_site)
+
+
+
+        
 
 
 if not os.path.exists(temp_folder):
@@ -838,6 +896,10 @@ parse_img_db()
 
 website_root = credentials['website_root']
 
+if not os.path.exists(website_root + img_folder):
+    os.makedirs(website_root + img_folder)
+
+
 
 #Clear import catalog files (files of files)
 with open(temp_folder + 'files_prod_import.txt', 'w+', newline='', encoding="utf8") as files_toimport:
@@ -852,7 +914,9 @@ crossparser_tools.write_to_log('\n\n ********** Script started *********** \n\n'
 #start_digger(digger_id)
 #sleep(10)
 
-parse_new()
+#parse_new()
+
+checking_all_diggers()
 
 make_categories_csv()
 

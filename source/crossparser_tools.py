@@ -43,4 +43,4 @@ def write_to_log(text):
         currentDT = datetime.datetime.now()
         #full_pattern = re.compile('[^a-zA-Z0-9]|-')
         #text = re.sub(full_pattern, ' ', text)
-        cr_file.write('[' + str(currentDT) + ']  ' + text + '\n')
+        cr_file.write('[' + str(currentDT) + ']  ' + str(text) + '\n')
