@@ -14,3 +14,4 @@ prod_categories$$_CATEGORY_ID_
 some$$_QUANTITY_
 some2$$_SEO_KEYWORD_
 some3$$_ATTRIBUTES_
+back_links_to_category$$_EAN_

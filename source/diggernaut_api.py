@@ -648,9 +648,10 @@ def json_to_csv(data, csvexportfile):
                         if check != '':
                             checked_imgs.append(check)
 
-                    value = (',').join(checked_imgs)
                     if len(checked_imgs) == 0:
                         value = ''
+                    else:
+                        value = (',').join(checked_imgs)
                     
                     
                 row_out[csv_header.index(attr)] = value
@@ -722,8 +723,8 @@ def image_check(img):
         return img_module_folder + img_name
 
     except Exception as e: 
-        print(e)
         print('unable to download img:', img)
+        print(e)
         img_counter_failed_to_dowload += 1
         return ''
 
@@ -844,7 +845,7 @@ def checking_all_diggers():
             link_to_parse = get_nextlink_forsite(current_site)
 
             if link_to_parse != '':
-                crossparser_tools.write_to_log('start parsing: ' + current_site + 'digger_id: ' + digger_id)
+                crossparser_tools.write_to_log('start digger on link: ' + link_to_parse + ', digger_id: ' + digger_id)
                 start_digger(digger_id, link_to_parse)
                 is_done = False
 
@@ -919,6 +920,7 @@ crossparser_tools.write_to_log('\n\n ********** Script started *********** \n\n'
 checking_all_diggers()
 
 make_categories_csv()
+
 
 crossparser_tools.write_to_log('parsing process completed')
 crossparser_tools.write_to_log('totally parsed: ' + str(items_counter_parsed) + ' items' )

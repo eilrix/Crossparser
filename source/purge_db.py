@@ -56,10 +56,6 @@ def clear_db():
     else:
         crossparser_tools.write_to_log('db purge failed')
 
-    #os.system("sudo rm -r -f /var/www/html/boots-market/system/storage/cache/")
-    #shutil.rmtree('/var/www/html/boots-market/system/storage/cache/')
-    #os.mkdir('/var/www/html/boots-market/system/storage/cache/')
-
 
 
 clear_db()
