@@ -20,6 +20,16 @@ temp_folder = proj_root_dir + 'temp/'
 config_folder = proj_root_dir + 'config/'
 data_folder = proj_root_dir + 'data/'
 
+file_of_raw_catalogs = temp_folder + 'files_to_parse.txt'
+
+
+if not os.path.exists(temp_folder):
+    os.mkdir(temp_folder)
+
+if not os.path.exists(data_folder):
+    os.mkdir(data_folder)
+
+
 
 file_dir_loc = dirpath + '/'
 

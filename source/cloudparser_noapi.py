@@ -19,13 +19,13 @@ import crossparser_tools
 credentials = crossparser_tools.parse_credentials()
 temp_folder = crossparser_tools.temp_folder
 config_folder = crossparser_tools.config_folder
+file_of_raw_catalogs = crossparser_tools.file_of_raw_catalogs
 
 websites = {}
 weblinks = {}
 catalogs = []
 websites_parsed = {}
 window_handles = {}
-file_of_catalogs = temp_folder + 'files_to_parse.txt'
 
 counter_links_total = 0
 counter_links_parsed = 0
@@ -186,8 +186,8 @@ def start_checking():
             counter_links_parsed += 1
 
             crossparser_tools.write_to_log('Downloaded file of ' + site + '. Saved to ' + filename)
-            with open(file_of_catalogs, 'a', newline='', encoding="utf8") as files_toimport:
-                files_toimport.write(filename + '\n')
+            with open(file_of_raw_catalogs, 'a', newline='', encoding="utf8") as files_toimport:
+                files_toimport.write(site + '$$' + filename + '\n')
 
             #Start parse new link:
             link = get_nextlink_forsite(site)
@@ -210,7 +210,7 @@ def start_checking():
 def parsnew():
 
     #Clear import catalog files (files of files)
-    with open(file_of_catalogs, 'w+', newline='', encoding="utf8") as files_toimport:
+    with open(file_of_raw_catalogs, 'w+', newline='', encoding="utf8") as files_toimport:
         files_toimport.close()
 
 
@@ -250,8 +250,8 @@ def parsnew():
     start_checking()
 
     crossparser_tools.write_to_log('Done with cloudparser')
-    crossparser_tools.write_to_log('Totally links found: ' + counter_links_total)
-    crossparser_tools.write_to_log('Successfully parsed: ' + counter_links_parsed)
+    crossparser_tools.write_to_log('Totally links found: ' + str(counter_links_total))
+    crossparser_tools.write_to_log('Successfully parsed: ' + str(counter_links_parsed))
 
 
 
