@@ -166,30 +166,43 @@ def create_category(prod_categs, prod_brand, prod_name, prod_price, prod_image):
 
 
     #print('prod_categs1: ', prod_categs)
+
+    # The purpose is:
+    # 1. Define gender of item. It can be two values: (Мужские) and (Женские)
     prod_gender = '?Мужские|Женские'
 
+    for cat in prod_categs:
+        if 'женск' in cat or 'Женск' in cat or 'Женщинам' in cat:
+            prod_gender = 'Женские'
+        if 'мужск' in cat or 'Мужск' in cat or 'Мужчинам' in cat:
+            prod_gender = 'Мужские'
+
+    if prod_gender == '?Мужские|Женские':
+        print('cant define prod gender for ' + prod_name)
+        return ''
+
+    global_prod_gender = prod_gender
+
+    # 2. Create two chains: (gender|type|brand) and (brand|type)
+    cat_gender_chain = prod_gender + '|' + '|'.join(prod_categs) + '|' + prod_brand
+    cat_brand_chain = 'Бренды' + '|' + prod_brand + '|' + '|'.join(prod_categs)
+
+
+
+    # Customize chains search for certain shops
+    # <Optional loop>
 
     if current_site == 'lamoda.ru':
 
         if 'Обувь' not in prod_categs:
             return ''
 
-        if prod_categs[0] == 'Женщинам':
-            prod_gender = 'Женские'
-        if prod_categs[0] == 'Мужчинам':
-            prod_gender = 'Мужские'
-
-        if prod_gender == '?Мужские|Женские':
-            return ''
-
-        global_prod_gender = prod_gender
-
         index = prod_categs.index('Обувь')
         prod_categs = prod_categs[index + 1 : len(prod_categs)]
         if 'Кроссовки и кеды' in prod_categs:
             prod_categs.pop(prod_categs.index('Кроссовки и кеды'))
 
-        #Purpose is to create two chains: (gender|type|brand) and (brand|type)
+
         cat_gender_chain = prod_gender + '|' + '|'.join(prod_categs) + '|' + prod_brand
         cat_brand_chain = 'Бренды' + '|' + prod_brand + '|' + '|'.join(prod_categs)
         
@@ -200,8 +213,6 @@ def create_category(prod_categs, prod_brand, prod_name, prod_price, prod_image):
 
 
     if current_site == 'sportmaster.ru':
-        #temporary
-        return ''
 
         categs = prod_name.split(prod_brand.strip())
         if len(categs) != 2:
@@ -209,26 +220,20 @@ def create_category(prod_categs, prod_brand, prod_name, prod_price, prod_image):
 
         categs = categs[0]
 
-        if 'женские' in categs:
-            prod_gender = 'Женские'
-        if 'мужские' in categs:
-            prod_gender = 'Мужские'
-
-        if prod_gender == '?Мужские|Женские':
-            return ''
-
-        global_prod_gender = prod_gender
-
         categs = categs.split(' ')
         cat_type = categs[0].lower()
 
         cat_gender_chain = prod_gender + '|' + cat_type + '|' + prod_brand
         cat_brand_chain = 'Бренды' + '|' + prod_brand + '|' + cat_type
-        
-        prod_cats1 = check_new_chain(cat_gender_chain, prod_price, prod_image)
-        prod_cats2 = check_new_chain(cat_brand_chain, prod_price, prod_image)
 
-        return prod_cats1 + prod_cats2
+
+
+    # </>
+        
+    prod_cats1 = check_new_chain(cat_gender_chain, prod_price, prod_image)
+    prod_cats2 = check_new_chain(cat_brand_chain, prod_price, prod_image)
+
+    return prod_cats1 + prod_cats2
         
 
 
@@ -645,6 +650,9 @@ def parse_row(row, csvwriter):
 
             row_out[i] = row
 
+        #Save this store link
+        if current_row_title == '_EAN_':
+            row_out[i] = current_site
 
     
     # </>
@@ -724,9 +732,18 @@ def make_csv(file):
                 if row == '':
                     continue
 
-                row = row.strip().replace('\n', '').replace('\r', '')
-                parse_row(row, csvexportfile)
                 items_counter_parsed += 1
+
+                row = row.strip().replace('\n', '').replace('\r', '')
+
+                if credentials['is_server'] == 'no':
+                    parse_row(row, csvexportfile)
+                if credentials['is_server'] == 'yes':
+                    try:
+                        parse_row(row, csvexportfile)
+                    except Exception as e:
+                        crossparser_tools.write_to_log('failed to parse row of file:' + file + '. row: ' + row)
+                        crossparser_tools.write_to_log(e)
 
 
     if csv_out_data_counter == 0:
@@ -754,6 +771,9 @@ def parse_new():
             line = line.split('$$')
             files_to_parse[line[1].strip()] = line[0].strip().replace('\n', '')
 
+
+    if len(files_to_parse) == 0:
+        return
 
     for file, site in files_to_parse.items():
         if os.path.isfile(file):

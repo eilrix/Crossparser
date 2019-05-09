@@ -7,7 +7,7 @@ prod_description$$_DESCRIPTION_
 Изображения$$_IMAGES_
 products_imgs2$$_IMAGE_
 Ссылка на товар$$_LOCATION_
-prod_brand$$_MANUFACTURER_
+Производитель$$_MANUFACTURER_
 Размер$$_OPTIONS_
 price_discount$$_SPECIAL_
 Категория 1$$_CATEGORY_ID_

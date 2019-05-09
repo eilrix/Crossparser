@@ -253,6 +253,8 @@ def parsnew():
     crossparser_tools.write_to_log('Totally links found: ' + str(counter_links_total))
     crossparser_tools.write_to_log('Successfully parsed: ' + str(counter_links_parsed))
 
+    driver.quit()
+
 
 
 
@@ -260,4 +262,6 @@ if __name__ == '__main__':
 
 
     parsnew()
+
+    import cloudparser_parse_files
 

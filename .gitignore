@@ -1,6 +1,7 @@
 # Visual Studio 2015 user specific files
 .vs/
 temp/
+data/
 source/__pycache__/
 
 # Compiled Object files
