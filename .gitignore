@@ -4,6 +4,9 @@ temp/
 data/
 source/__pycache__/
 
+*.stackdump
+*.log
+
 # Compiled Object files
 *.slo
 *.lo

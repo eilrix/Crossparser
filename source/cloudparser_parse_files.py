@@ -4,9 +4,7 @@
 import requests
 from time import sleep
 from operator import itemgetter
-import re, string, timeit
 import regex
-from transliterate import translit, get_available_language_codes
 import os.path
 import urllib.request
 from PIL import Image
@@ -46,6 +44,7 @@ print_rows_formating = False
 global_prod_gender = ''
 img_db = {}
 img_db_info = {}
+partner_links = {}
 
 #Counters for statistic
 img_counter_existed = 0
@@ -82,9 +81,18 @@ def parse_img_db():
             img_db_info['size'] = '0 Mb'
 
 
+def parse_parter_links():
+    with open(config_folder + 'partner_links.txt', 'r') as cr_file:
+        for line in cr_file:
+            if not line.strip().startswith('#'):
+                if line.strip():
+                    k, v = line.strip().split('$$')
+                    partner_links[k.strip()] = v.strip()
+
+
 def parse_export_fields():
     i = 0
-    with open(config_folder + 'export_fields.txt', 'r') as cr_file:
+    with open(config_folder + 'export_fields.txt', 'r', encoding="utf8") as cr_file:
         for line in cr_file:
             if not line.strip().startswith('#'):
                 if line.strip():
@@ -94,36 +102,6 @@ def parse_export_fields():
                     export_fields_array.append(v)
                     i = i + 1
 
-
-
-def to_seo_url(string):
-    seo_url = string.lower().replace(' ', '-').replace('"', '').replace('--', '-')
-    #for c in string.punctuation:
-    #    seo_url=seo_url.replace(c,"-")
-    seo_url = translit(seo_url, 'ru',  reversed=True)
-    full_pattern = re.compile('[^a-zA-Z0-9]|-')
-    seo_url = re.sub(full_pattern, '-', seo_url).replace('--', '-')
-    return seo_url
-
-
-
-
-def parse_header(row, csvexportfile):
-
-    global table_titles_list
-    table_titles_list = []
-
-    row_out = []
-    #print("header: ", row)
-
-    for cell in row:
-        table_titles_list.append(cell)
-
-
-    for attr, value in export_fields.items():
-        row_out.append(value)
-    
-    csvexportfile.write(';'.join(row_out) + '\n')
 
 
 def create_category(prod_categs, prod_brand, prod_name, prod_price, prod_image):
@@ -171,15 +149,25 @@ def create_category(prod_categs, prod_brand, prod_name, prod_price, prod_image):
     # 1. Define gender of item. It can be two values: (Мужские) and (Женские)
     prod_gender = '?Мужские|Женские'
 
+
     for cat in prod_categs:
-        if 'женск' in cat or 'Женск' in cat or 'Женщинам' in cat:
+        cat = cat.lower()
+        if 'женск' in cat or 'женщин' in cat:
             prod_gender = 'Женские'
-        if 'мужск' in cat or 'Мужск' in cat or 'Мужчинам' in cat:
+        if 'мужск' in cat or 'мужчин' in cat:
             prod_gender = 'Мужские'
 
     if prod_gender == '?Мужские|Женские':
-        print('cant define prod gender for ' + prod_name)
-        return ''
+        #look in prod_name
+        name = prod_name.lower()
+        if 'женск' in name or 'женщин' in name:
+            prod_gender = 'Женские'
+        if 'мужск' in name or 'мужчин' in name:
+            prod_gender = 'Мужские'
+
+        if prod_gender == '?Мужские|Женские':
+            print('cant define prod gender for ' + prod_name)
+            return ''
 
     global_prod_gender = prod_gender
 
@@ -366,7 +354,7 @@ def make_categories_csv():
             h1header = ' '.join(categs)
 
             #SEO URL:
-            seo_url = to_seo_url(h1header)
+            seo_url = crossparser_tools.to_seo_url(h1header)
 
 
             #Categs for menu:
@@ -427,7 +415,7 @@ def image_check(img):
         #print('downloading img:', img)
 
         img_name = img.replace('https://', '').replace('http://', '').replace('www', '').replace('jpg', '').replace('/', '')
-        img_name = to_seo_url(img_name).replace('-', '')
+        img_name = crossparser_tools.to_seo_url(img_name).replace('-', '')
         img_name = img_name + '.jpg'
 
         file_path = website_root + img_folder + img_name
@@ -483,6 +471,7 @@ def parse_row(row, csvwriter):
     if row == '':
         return
 
+    global table_titles_list
     n_import = len(table_titles_list)
     n_export = len(export_fields)
     row_out = [''] * n_export
@@ -538,16 +527,17 @@ def parse_row(row, csvwriter):
         
         #Format Price:
         if current_row_title == '_PRICE_':
-            row_out[i] = ''.join(re.findall(r'\d+', cell.replace(' ', '')))
+            row_out[i] = crossparser_tools.get_only_nums(cell)
 
         if current_row_title == '_SPECIAL_':
-            special_price = ''.join(re.findall(r'\d+', cell.replace(' ', '')))
+            special_price = crossparser_tools.get_only_nums(cell)
             if special_price != '':
                 price_index = export_fields_array.index('_PRICE_')
                 curr_price = row_out[price_index]
-                row_out[price_index] = special_price
-                special_price = '.'.join(re.findall(r'\d+', curr_price.replace(' ', '').replace('\n', '').replace('\r', '')))
-                row_out[i] = '1,0,' + str(special_price) + '.00,0000-00-00,0000-00-00'
+                if special_price > curr_price:
+                    row_out[price_index] = special_price
+                    special_price = crossparser_tools.get_only_nums(curr_price)
+                    row_out[i] = '1,0,' + str(special_price) + '.00,0000-00-00,0000-00-00'
 
         #Copy SKU to Model:
         if current_row_title == '_MODEL_':
@@ -632,7 +622,7 @@ def parse_row(row, csvwriter):
             index = export_fields_array.index('_NAME_')
             prod_name = row_out[index]
 
-            seo_url = to_seo_url(prod_name)
+            seo_url = crossparser_tools.to_seo_url(prod_name)
 
             row_out[i] = seo_url + '-' + prod_sku.lower()
 
@@ -653,6 +643,24 @@ def parse_row(row, csvwriter):
         #Save this store link
         if current_row_title == '_EAN_':
             row_out[i] = current_site
+
+        if current_row_title == '_LOCATION_':
+            link = cell.replace(current_site, '').replace('https', '').replace('http', '').replace('www', '')
+            link_id = crossparser_tools.get_only_letters(link)
+            with open(data_folder + 'partner_links', 'a+') as partner_links_file:
+
+                link_no_http = cell.replace('https://', '').replace('http://', '').replace('www.', '')
+                if current_site not in partner_links:
+                    crossparser_tools.write_to_log('No partner link for site: ' + current_site)
+                    return
+
+                part_link = partner_links[current_site]
+                deeplink = part_link + '?ulp=http%3A%2F%2F' + link_no_http
+
+                link_row = link_id + '$$' + deeplink + '\n'
+                partner_links_file.write(link_row)
+
+            row_out[i] = link_id
 
     
     # </>
@@ -687,63 +695,46 @@ def json_to_csv(data, csvexportfile):
 
 
 
-def make_csv(file):
 
-    filename = file + '-import.csv'
+def make_csv(file):
 
     global items_counter_parsed
     global csv_out_data_counter
     csv_out_data_counter = 0
 
+    file_lines = crossparser_tools.read_csv(file, False)
+
+    global table_titles_list
+    table_titles_list = crossparser_tools.table_titles_list
+
+    filename = file + '-import.csv'
 
     with open(filename, 'w+', newline='', encoding="utf8") as csvexportfile:
-        with open(file, 'r', newline='', encoding="utf8") as csvimportfile:
 
-            #replace ; and \n symbol in cells
-            str_row = ''.join(csvimportfile.readlines())
-            replace_flag = False
-            i = 0
-            str_row_list = list(str_row)
+        #Make header
+        row_out = []
+        for attr, value in export_fields.items():
+            row_out.append(value)
 
-            for sym in str_row_list:
-                if sym == '"':
-                    replace_flag = not replace_flag
+        csvexportfile.write(';'.join(row_out) + '\n')
 
-                if replace_flag == True:
-                    if sym == ";":
-                        str_row_list[i] = ","
-                    if sym == "\n":
-                        str_row_list[i] = ""
+        #Parse lines
+        for row in file_lines:
+            if row == '':
+                continue
 
-                i += 1
+            items_counter_parsed += 1
 
-            
-            str_row = ''.join(str_row_list)
-            file_lines = str_row.replace('"', "").split('\n')
+            row = row.strip().replace('\n', '').replace('\r', '')
 
-            csv_header = file_lines[0].replace('\r', '').replace('\ufeff', '').split(';')
-            #print('csv_header: ', csv_header)
-            parse_header(csv_header, csvexportfile)
-
-            file_lines.pop(0)
-
-
-            for row in file_lines:
-                if row == '':
-                    continue
-
-                items_counter_parsed += 1
-
-                row = row.strip().replace('\n', '').replace('\r', '')
-
-                if credentials['is_server'] == 'no':
+            if credentials['is_server'] == 'no':
+                parse_row(row, csvexportfile)
+            if credentials['is_server'] == 'yes':
+                try:
                     parse_row(row, csvexportfile)
-                if credentials['is_server'] == 'yes':
-                    try:
-                        parse_row(row, csvexportfile)
-                    except Exception as e:
-                        crossparser_tools.write_to_log('failed to parse row of file:' + file + '. row: ' + row)
-                        crossparser_tools.write_to_log(e)
+                except Exception as e:
+                    crossparser_tools.write_to_log('failed to parse row of file:' + file + '. row: ' + row)
+                    crossparser_tools.write_to_log(e)
 
 
     if csv_out_data_counter == 0:
@@ -787,8 +778,8 @@ def parse_new():
 
 
 parse_export_fields()
+parse_parter_links()
 parse_img_db()
-
 
 website_root = credentials['website_root']
 
@@ -798,10 +789,13 @@ if not os.path.exists(website_root + img_folder):
 
 
 #Clear import catalog files (files of files)
-with open(temp_folder + 'files_prod_import.txt', 'w+', newline='', encoding="utf8") as files_toimport:
+with open(temp_folder + 'files_prod_import.txt', 'w+') as files_toimport:
     files_toimport.close()
-with open(temp_folder + 'files_categ_import.txt', 'w+', newline='', encoding="utf8") as files_toimport:
+with open(temp_folder + 'files_categ_import.txt', 'w+') as files_toimport:
     files_toimport.close()
+
+with open(data_folder + 'partner_links', 'w+') as partner_links_file:
+    partner_links_file.close()
     
 
 crossparser_tools.write_to_log('\n\n ********** Script started *********** \n\n')

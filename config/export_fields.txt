@@ -1,16 +1,16 @@
-# delimiter is $$
-Артикул$$_SKU_
+п»ї# delimiter is $$
+РђСЂС‚РёРєСѓР»$$_SKU_
 prod_sku2$$_MODEL_
-Заголовок$$_NAME_
-Цена$$_PRICE_
+Р—Р°РіРѕР»РѕРІРѕРє$$_NAME_
+Р¦РµРЅР°$$_PRICE_
 prod_description$$_DESCRIPTION_
-Изображения$$_IMAGES_
+РР·РѕР±СЂР°Р¶РµРЅРёСЏ$$_IMAGES_
 products_imgs2$$_IMAGE_
-Ссылка на товар$$_LOCATION_
-Производитель$$_MANUFACTURER_
-Размер$$_OPTIONS_
-price_discount$$_SPECIAL_
-Категория 1$$_CATEGORY_ID_
+РЎСЃС‹Р»РєР° РЅР° С‚РѕРІР°СЂ$$_LOCATION_
+РџСЂРѕРёР·РІРѕРґРёС‚РµР»СЊ$$_MANUFACTURER_
+Р Р°Р·РјРµСЂ$$_OPTIONS_
+Р¦РµРЅР°2$$_SPECIAL_
+РљР°С‚РµРіРѕСЂРёСЏ 1$$_CATEGORY_ID_
 some$$_QUANTITY_
 some2$$_SEO_KEYWORD_
 some3$$_ATTRIBUTES_

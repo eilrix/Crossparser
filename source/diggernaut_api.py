@@ -576,6 +576,10 @@ def parse_row(row, csvwriter):
 
             row_out[i] = row
 
+        if current_row_title == '_LOCATION_':
+            link_id = ''.join(re.findall(r'\w+', cell)).replace('http', '').replace('www', '')
+            print(link_id)
+
 
     
     # </>
