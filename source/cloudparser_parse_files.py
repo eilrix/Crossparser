@@ -42,8 +42,10 @@ categories_parent_ids = []
 categories_max_id = 0
 print_rows_formating = False
 global_prod_gender = ''
+global_prod_id = ''
 img_db = {}
 img_db_info = {}
+img_db_products = {}
 partner_links = {}
 
 #Counters for statistic
@@ -66,6 +68,14 @@ def parse_img_db():
                     if line.strip():
                         k, v = line.strip().split('$$')
                         img_db[k.strip()] = v.strip()
+
+    if os.path.isfile(data_folder + 'img_db_prods'):
+        with open(data_folder + 'img_db_prods', 'r') as cr_file:
+            for line in cr_file:
+                if not line.strip().startswith('#'):
+                    if line.strip():
+                        k, v = line.strip().split('$$')
+                        img_db_products[k.strip()] = v.strip()
 
     if os.path.isfile(data_folder + 'img_db_info.txt'):
         with open(data_folder + 'img_db_info.txt', 'r') as cr_file:
@@ -115,15 +125,15 @@ def create_category(prod_categs, prod_brand, prod_name, prod_price, prod_image):
 
     if prod_categs == '' or prod_categs == ' ' or prod_categs is None:
         print('no prod_categs for ' + prod_name)
-        return ''
+        #return ''
 
     if prod_brand == '' or prod_brand == ' ' or prod_brand is None:
         print('no prod_brand for ' + prod_name)
-        return ''
+        #return ''
 
     if prod_price == '' or prod_price == ' ' or prod_price is None:
         print('no prod_price for ' + prod_name)
-        return ''
+        #return ''
 
     #Format categs
     empty_cells_i = []
@@ -167,7 +177,7 @@ def create_category(prod_categs, prod_brand, prod_name, prod_price, prod_image):
 
         if prod_gender == '?Мужские|Женские':
             print('cant define prod gender for ' + prod_name)
-            return ''
+            #return ''
 
     global_prod_gender = prod_gender
 
@@ -414,8 +424,8 @@ def image_check(img):
     try:
         #print('downloading img:', img)
 
-        img_name = img.replace('https://', '').replace('http://', '').replace('www', '').replace('jpg', '').replace('/', '')
-        img_name = crossparser_tools.to_seo_url(img_name).replace('-', '')
+        #img_name = crossparser_tools.get_uniqid_from_url(img, current_site)
+        img_name = crossparser_tools.get_rand_uniqid(15)
         img_name = img_name + '.jpg'
 
         file_path = website_root + img_folder + img_name
@@ -449,9 +459,21 @@ def image_check(img):
         #print('size out: ' , size)
 
         img_db[img] = img_module_folder + img_name
+        global global_prod_id
+        img_db_products[img] = global_prod_id
 
+        #Write to DB
         with open(data_folder + 'img_db', 'a+', newline='', encoding="utf8") as img_dbfile:
             img_dbfile.write(img + '$$' + img_module_folder + img_name + '\n')
+
+        with open(data_folder + 'img_db_prods', 'a+', newline='', encoding="utf8") as img_dbfile:
+            img_dbfile.write(img_name + '$$' + global_prod_id + '\n')
+
+        #Add to ElasticSearch
+        if credentials['is_server'] == 'yes':
+            image_match_add.add_img(file_path, global_prod_id)
+
+        
 
         img_counter_dowloaded += 1
 
@@ -511,7 +533,7 @@ def parse_row(row, csvwriter):
 
 
         if current_row_title == '_DESCRIPTION_' or current_row_title == '_NAME_' or current_row_title == '_MANUFACTURER_':
-            row_out[i] = '"' + cell.strip() + '"'
+            row_out[i] = '"' + cell.strip().replace("'", '') + '"'
 
         #Format Size:
         if current_row_title == '_OPTIONS_':
@@ -539,11 +561,39 @@ def parse_row(row, csvwriter):
                     special_price = crossparser_tools.get_only_nums(curr_price)
                     row_out[i] = '1,0,' + str(special_price) + '.00,0000-00-00,0000-00-00'
 
+        #Form unique SKU
+        if current_row_title == '_SKU_':
+            #Save SKU to _UPC_
+            upc_index = export_fields_array.index('_UPC_')
+            row_out[upc_index] = cell
+            #Change sku
+            url_index = export_fields_array.index('_LOCATION_')
+            url = row_out[url_index]
+            #id_from_url = crossparser_tools.get_uniqid_from_url(url, current_site)
+            id_from_url = crossparser_tools.get_rand_uniqid(10)
+
+            if str(cell) not in id_from_url:
+                id_from_url += str(cell)
+            row_out[i] = id_from_url
+            global global_prod_id
+            global_prod_id = id_from_url
+            
         #Copy SKU to Model:
         if current_row_title == '_MODEL_':
             sku_index = export_fields_array.index('_SKU_')
             curr_sku = row_out[sku_index]
             row_out[i] = curr_sku
+
+        #SEO URL:
+        if current_row_title == '_SEO_KEYWORD_': 
+            index = export_fields_array.index('_SKU_')
+            prod_sku = row_out[index]
+            index = export_fields_array.index('_NAME_')
+            prod_name = row_out[index]
+
+            seo_url = crossparser_tools.to_seo_url(prod_name)
+
+            row_out[i] = seo_url + '-' + prod_sku.lower()
 
 
         #Parse and download all images:
@@ -615,16 +665,6 @@ def parse_row(row, csvwriter):
 
             row_out[i] = ','.join(categs_ids)
 
-        #SEO URL:
-        if current_row_title == '_SEO_KEYWORD_': 
-            index = export_fields_array.index('_SKU_')
-            prod_sku = row_out[index]
-            index = export_fields_array.index('_NAME_')
-            prod_name = row_out[index]
-
-            seo_url = crossparser_tools.to_seo_url(prod_name)
-
-            row_out[i] = seo_url + '-' + prod_sku.lower()
 
         #Set up attributes: Brand, Gender, Season:
         if current_row_title == '_ATTRIBUTES_':
@@ -702,7 +742,7 @@ def make_csv(file):
     global csv_out_data_counter
     csv_out_data_counter = 0
 
-    file_lines = crossparser_tools.read_csv(file, False)
+    file_lines = crossparser_tools.read_csv(file, True)
 
     global table_titles_list
     table_titles_list = crossparser_tools.table_titles_list
@@ -786,6 +826,9 @@ website_root = credentials['website_root']
 if not os.path.exists(website_root + img_folder):
     os.makedirs(website_root + img_folder)
 
+
+if credentials['is_server'] == 'yes':
+    import image_match_add
 
 
 #Clear import catalog files (files of files)

@@ -334,6 +334,7 @@ def parsnew():
         driver = webdriver.Chrome(chromedriver_path, chrome_options=options)
 
 
+    #Unfortunately chrome doesnt saving any files in specific folder. Need to use Firefox for this only
     if credentials['is_server'] == 'yes':
         #chromedriver_path = config_folder + 'chromedriver'
         #options.add_argument('--no-sandbox')

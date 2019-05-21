@@ -21,3 +21,7 @@ os.mkdir(website_root + 'image/cache/catalog/product')
 
 os.remove(data_folder + 'img_db')
 os.remove(data_folder + 'img_db_info.txt')
+
+if credentials['is_server'] == 'yes':
+    import image_match_add
+    image_match_add.purge_imgs()

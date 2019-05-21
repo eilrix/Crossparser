@@ -1,5 +1,6 @@
 ﻿# delimiter is $$
 Артикул$$_SKU_
+Артикул2$$_UPC_
 prod_sku2$$_MODEL_
 Заголовок$$_NAME_
 Цена$$_PRICE_

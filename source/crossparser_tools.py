@@ -4,6 +4,7 @@
 import os.path
 import datetime
 import re, string, timeit
+import uuid
 from transliterate import translit, get_available_language_codes
 
 
@@ -125,5 +126,14 @@ def to_seo_url(string):
     seo_url = re.sub(full_pattern, '-', seo_url).replace('--', '-')
     return seo_url
 
+def get_uniqid_from_url(url, site):
+    print('url', url)
 
-import urllib.request
+    id = url.replace(site, '').replace('https://', '').replace('http://', '').replace('www', '').replace('jpg', '').replace('/', '')
+    id = to_seo_url(id).replace('-', '')
+
+    return id
+
+
+def get_rand_uniqid(n):
+    return uuid.uuid4().hex[:n]

@@ -1,3 +1,2 @@
 # delimiter is $$
-lamoda.ru$$https://www.lamoda.ru/c/2968/shoes-krossovki-kedy/||https://www.lamoda.ru/c/21/shoes-sapogi/
-sportmaster.ru$$https://www.sportmaster.ru/catalog/muzhskaya_obuv/krossovki/||https://www.sportmaster.ru/catalog/muzhskaya_obuv/kedy/||https://www.sportmaster.ru/catalog/muzhskaya_obuv/polubotinki/
+wildberries.ru$$https://www.wildberries.ru/catalog/aksessuary/avtotovary
