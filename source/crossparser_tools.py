@@ -55,11 +55,11 @@ def parse_credentials():
 
 def write_to_log(text):
     print(text)
-    with open(temp_folder + 'log.txt', 'a+') as cr_file:
+    with open(temp_folder + 'log.txt', 'a+') as log_file:
         currentDT = datetime.datetime.now()
         #full_pattern = re.compile('[^a-zA-Z0-9]|-')
         #text = re.sub(full_pattern, ' ', text)
-        cr_file.write('[' + str(currentDT) + ']  ' + str(text) + '\n')
+        log_file.write('[' + str(currentDT) + ']  ' + str(text) + '\n')
 
 
 
@@ -81,7 +81,7 @@ def read_csv(file, is_clear):
 
                 if replace_flag == True:
                     if sym == ";":
-                        str_row_list[i] = ","
+                        str_row_list[i] = "|"
                     if sym == "\n":
                         str_row_list[i] = ""
                 i += 1

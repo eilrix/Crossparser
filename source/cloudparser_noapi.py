@@ -144,8 +144,8 @@ def parse_link(site, link):
         input = driver.find_element_by_css_selector('div.inputfields input.textbox.urlinput')
         input.send_keys(link)
 
-        strt_btn = driver.find_element_by_css_selector('#startDemoBtn')
-        #strt_btn = driver.find_element_by_css_selector('#startBtn')
+        #strt_btn = driver.find_element_by_css_selector('#startDemoBtn')
+        strt_btn = driver.find_element_by_css_selector('#startBtn')
         strt_btn.click()
 
         WebDriverWait(driver, 33).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#progressBar')))
@@ -220,6 +220,10 @@ def unite_prices(filename1, filename2):
             table_titles_list = crossparser_tools.table_titles_list
 
             table_titles_list.append('Цена2')
+
+            if 'Цена' not in table_titles_list:
+                print('error: invalid csv file, no price column')
+                return
 
             price_index = table_titles_list.index('Цена')
 

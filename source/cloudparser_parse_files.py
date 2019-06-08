@@ -119,21 +119,21 @@ def create_category(prod_categs, prod_brand, prod_name, prod_price, prod_image):
     global categories_ids
     global categories_max_id
     global global_prod_gender
-    prod_categs = prod_categs.split(',')
+    prod_categs = prod_categs.split('|')
     prod_brand = prod_brand.replace('"', '')
     prod_name = prod_name.replace('"', '')
 
     if prod_categs == '' or prod_categs == ' ' or prod_categs is None:
         print('no prod_categs for ' + prod_name)
-        #return ''
+        return ''
 
     if prod_brand == '' or prod_brand == ' ' or prod_brand is None:
         print('no prod_brand for ' + prod_name)
-        #return ''
+        return ''
 
     if prod_price == '' or prod_price == ' ' or prod_price is None:
         print('no prod_price for ' + prod_name)
-        #return ''
+        return ''
 
     #Format categs
     empty_cells_i = []
@@ -177,7 +177,7 @@ def create_category(prod_categs, prod_brand, prod_name, prod_price, prod_image):
 
         if prod_gender == '?Мужские|Женские':
             print('cant define prod gender for ' + prod_name)
-            #return ''
+            return ''
 
     global_prod_gender = prod_gender
 
@@ -502,7 +502,7 @@ def parse_row(row, csvwriter):
     row = row.split(';')
 
     #First 4 cells is usually categories
-    row[0] = row[0] + ',' + row[1] + ',' + row[2] + ',' + row[3]
+    row[0] = row[0] + '|' + row[1] + '|' + row[2] + '|' + row[3]
 
     #Format export row
     i = 0
@@ -539,7 +539,7 @@ def parse_row(row, csvwriter):
         if current_row_title == '_OPTIONS_':
             new_size_cell = '"'
             cell = cell.replace('\n', '').replace('\r', '')
-            sizes_arr = cell.split(',')
+            sizes_arr = cell.split('|')
             for size in sizes_arr:
                 new_size_cell += 'select|Размер|'
                 new_size_cell += size
@@ -602,7 +602,7 @@ def parse_row(row, csvwriter):
             if cell == '':
                 return
 
-            imgs = cell.split(",")
+            imgs = cell.split('|')
             checked_imgs = []
             for img in imgs:
                 check = image_check(img)
@@ -628,7 +628,7 @@ def parse_row(row, csvwriter):
                 #Decline product without imgs:
                 return
 
-            curr_sku = curr_sku.split(',')
+            curr_sku = curr_sku.split('|')
             row_out[i] = curr_sku[0]
             curr_sku.pop(0)
             row_out[sku_index] = ','.join(curr_sku)
@@ -857,9 +857,9 @@ imgs_num = img_counter_existed + img_counter_dowloaded + img_counter_failed_to_d
 crossparser_tools.write_to_log('totally images: ' + str(imgs_num))
 crossparser_tools.write_to_log('already in db: ' + str(img_counter_existed))
 crossparser_tools.write_to_log('successfully downloaded: ' + str(img_counter_dowloaded))
+crossparser_tools.write_to_log('failed to download: ' + str(img_counter_failed_to_dowload))
 crossparser_tools.write_to_log('total size of downloaded: ' + str(img_counter_dowloaded_size / 1000000) + ' Mb')
 crossparser_tools.write_to_log('total size of downloaded after compression: ' + str(img_counter_dowloaded_size_compressed / 1000000) + ' Mb')
-crossparser_tools.write_to_log('failed to download: ' + str(img_counter_failed_to_dowload))
 
 
 
