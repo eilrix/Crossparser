@@ -1,3 +1,4 @@
 # delimiter is $$
 lamoda.ru$$https://cloudparser.ru/start/1795
 sportmaster.ru$$https://cloudparser.ru/start/9852
+tervolina.ru$$https://cloudparser.ru/start/12365

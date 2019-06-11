@@ -429,6 +429,10 @@ def image_check(img):
         img_name = img_name + '.jpg'
 
         file_path = website_root + img_folder + img_name
+
+        print('downloading img: ' + img)
+        print('save to: ' + file_path)
+
         urllib.request.urlretrieve(img, file_path)
 
         size = os.stat(file_path).st_size
@@ -471,7 +475,11 @@ def image_check(img):
 
         #Add to ElasticSearch
         if credentials['is_server'] == 'yes':
-            image_match_add.add_img(file_path, global_prod_id)
+            try:
+                image_match_add.add_img(file_path, global_prod_id)
+            except Exception as e: 
+                crossparser_tools.write_to_log('unable to download img:', img)
+                crossparser_tools.write_to_log(e)
 
         
 
@@ -520,6 +528,38 @@ def parse_row(row, csvwriter):
 
     if print_rows_formating == True:
         print("row formated for export: ", row_out)
+
+
+    #Little customize fields for special stores
+    if current_site == 'tervolina.ru':
+        index = export_fields_array.index('_MANUFACTURER_')
+        row_out[index] = 'Tervolina'
+
+    #Leave product if empty fields of:
+    index = export_fields_array.index('_MANUFACTURER_')
+    prod_brand = row_out[index].replace("'", '').replace('"', '')
+    prod_categs = row[0].replace('|', '').replace("'", '').replace('"', '')
+    index = export_fields_array.index('_PRICE_')
+    prod_price = row_out[index].replace("'", '').replace('"', '')
+    index = export_fields_array.index('_NAME_')
+    prod_name = row_out[index].replace("'", '').replace('"', '')
+
+    if prod_name == '' or prod_name == ' ' or prod_name is None:
+        print('no prod name')
+        return ''
+
+    if prod_categs == '' or prod_categs == ' ' or prod_categs is None:
+        print('no prod_categs for ' + prod_name)
+        return ''
+
+    if prod_brand == '' or prod_brand == ' ' or prod_brand is None:
+        print('no prod_brand for ' + prod_name)
+        return ''
+
+    if prod_price == '' or prod_price == ' ' or prod_price is None:
+        print('no prod_price for ' + prod_name)
+        return ''
+
 
     # Customize special fields (such as Size, etc)
     # <Optional loop>
@@ -619,19 +659,19 @@ def parse_row(row, csvwriter):
 
         #Set primary (first) image:
         if current_row_title == '_IMAGE_':
-            sku_index = export_fields_array.index('_IMAGES_')
-            curr_sku = row_out[sku_index]
-            if curr_sku == '':
+            imgs_index = export_fields_array.index('_IMAGES_')
+            imgs = row_out[imgs_index]
+            if imgs == '':
                 sku_index = export_fields_array.index('_LOCATION_')
-                curr_sku = row_out[sku_index]
+                imgs = row_out[sku_index]
                 crossparser_tools.write_to_log('No images collected for product: ' + curr_sku + ' (failed to download)')
                 #Decline product without imgs:
                 return
 
-            curr_sku = curr_sku.split('|')
-            row_out[i] = curr_sku[0]
-            curr_sku.pop(0)
-            row_out[sku_index] = ','.join(curr_sku)
+            imgs = imgs.split(',')
+            row_out[i] = imgs[0]
+            imgs.pop(0)
+            row_out[imgs_index] = ','.join(imgs)
 
         if current_row_title == '_QUANTITY_': 
             row_out[i] = str(99999)

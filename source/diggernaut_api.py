@@ -645,7 +645,7 @@ def json_to_csv(data, csvexportfile):
 
 
                 if attr == 'products_imgs':
-                    imgs = value.split(",")
+                    imgs = value.split(',')
                     checked_imgs = []
                     for img in imgs:
                         check = image_check(img)
