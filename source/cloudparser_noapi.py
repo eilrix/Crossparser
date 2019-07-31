@@ -32,6 +32,7 @@ catalogs = []
 websites_parsed = {}
 window_handles = {}
 tabs_delay = {}
+current_links = {}
 
 max_parse_time = datetime.timedelta(hours = 1)
 
@@ -97,12 +98,14 @@ def cloud_login():
     driver.get(url.rstrip())
         
     log_in_button  = driver.find_element_by_link_text(u'Войти')
+    driver.execute_script("arguments[0].scrollIntoView();", log_in_button)
     log_in_button.click()
     login_email_box = driver.find_element_by_name('LoginEmail')
     login_email_box.send_keys(credentials['cloudparser_mail'])
     login_password_box = driver.find_element_by_name('LoginPassword')
     login_password_box.send_keys(credentials['cloudparser_pass'])
     auth_button = driver.find_element_by_class_name('auth-form__btns')
+    driver.execute_script("arguments[0].scrollIntoView();$('#header').remove();", auth_button)
     auth_button.click()
 
 
@@ -110,7 +113,8 @@ def start_parse_all():
     global driver
 
     #form websites parsed map
-    websites_parsed = {}
+    global websites_parsed
+
     for site, url in websites.items():
         websites_parsed[site] = False
 
@@ -143,6 +147,9 @@ def parse_link(site, link):
     try:
 
         global driver
+        global current_links
+        current_links[site] = link
+
         url = websites[site]
         driver.get(url.strip())
 
@@ -154,6 +161,7 @@ def parse_link(site, link):
         if credentials['is_demo'] == 'yes':
             strt_btn = driver.find_element_by_css_selector('#startDemoBtn')
 
+        driver.execute_script("arguments[0].scrollIntoView();$('#header').remove();", strt_btn)
         strt_btn.click()
 
         WebDriverWait(driver, 33).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#progressBar')))
@@ -161,7 +169,7 @@ def parse_link(site, link):
 
     except Exception as e:
         crossparser_tools.write_to_log('Failed initiate parsing of ' + link)
-        crossparser_tools.write_to_log(e)
+        crossparser_tools.write_to_log(str(e))
 
 
 
@@ -185,10 +193,11 @@ def download_catalogs(site, is_save):
     #Dowload primary prices catalog
 
     download_btn = WebDriverWait(driver, 3600).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#content .products-menu .export-button")))
-        
+    driver.execute_script("arguments[0].scrollIntoView();$('#header').remove();", download_btn)
     download_btn.click()
     before = dict ([(f, None) for f in os.listdir (temp_folder)])
     final_download_btn = WebDriverWait(driver, 100).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#exportBtn")))
+    driver.execute_script("arguments[0].scrollIntoView();$('#header').remove();", final_download_btn)
     final_download_btn.click()
     sleep(5)
     after = dict ([(f, None) for f in os.listdir (temp_folder)])
@@ -196,6 +205,8 @@ def download_catalogs(site, is_save):
 
     if len(added) == 0:
         crossparser_tools.write_to_log('Failed to download file. Website: ' + site )
+        current_link = current_links[site]
+        crossparser_tools.write_to_log('Filed to parse link: ' + current_link)
         driver.save_screenshot("/var/www/html/boots-market/crossparser/temp/screenshot" + site + ".png")
         return ''
 
@@ -268,6 +279,7 @@ def start_checking():
 
     is_done = True
     global tabs_delay
+    global websites_parsed
 
     for site, handle in window_handles.items():
         try:
@@ -276,29 +288,31 @@ def start_checking():
 
             driver.switch_to.window(handle)
 
-
-            #Check if parsing of link last too long
             parse_time = datetime.datetime.now() - tabs_delay[site]
 
+            #Check if parsing hasnt started
+            if '/start/' in driver.current_url:
+                if parse_time > datetime.timedelta(minutes = 1.0):
+                    current_link = current_links[site]
+                    crossparser_tools.write_to_log('Parsing hasnt started. Filed to parse link: ' + current_link)
+
+                    #Start parse new link:
+                    is_done = check_parse_new_link(site, is_done)
+
+
+            #Check if parsing of link last too long
             if parse_time > max_parse_time:
                 print('parsing of website ' + site + 'took more than hour')
                 if check_exists_by_css_selector('#cancelBtn'):
                     btn = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#cancelBtn")))
+                    driver.execute_script("arguments[0].scrollIntoView();$('#header').remove();", btn)
                     btn.click()
                     sleep(2)
                 #Start parse new link:
-                link = get_nextlink_forsite(site)
-                if link != '':
-                    parse_link(site, link)
-                    is_done = False
-                else:
-                    crossparser_tools.write_to_log('Done parse all links for site: ' + site)
-                    #window_handles.pop(site)
-                    websites_parsed[site] = True
+                is_done = check_parse_new_link(site, is_done)
             else:
                 pass
                 #print('still parsing ' + str(parse_time))
-
 
             if check_exists_by_css_selector('#content .products-menu .export-button') == False:
                 #Tab still parsing, skip
@@ -311,12 +325,16 @@ def start_checking():
                 #Dowload secondary prices catalog
                 if filename1 != '':
                     btn = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div.ui-dialog.ui-widget button.ui-dialog-titlebar-close")))
+                    driver.execute_script("arguments[0].scrollIntoView();$('#header').remove();", btn)
                     btn.click()
                     btn = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#changePrice")))
+                    driver.execute_script("arguments[0].scrollIntoView();$('#header').remove();", btn)
                     btn.click()
                     btn = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#price > option:nth-child(2)")))
+                    driver.execute_script("arguments[0].scrollIntoView();$('#header').remove();", btn)
                     btn.click()
                     btn = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#applyChangePriceBtn")))
+                    driver.execute_script("arguments[0].scrollIntoView();$('#header').remove();", btn)
                     btn.click()
                     sleep(2)
                     filename2 = download_catalogs(site, False)
@@ -326,18 +344,12 @@ def start_checking():
 
 
                 #Start parse new link:
-                link = get_nextlink_forsite(site)
-                if link != '':
-                    tabs_delay[site] = datetime.datetime.now()
-                    parse_link(site, link)
-                    is_done = False
-                else:
-                    crossparser_tools.write_to_log('Done parse all links for site: ' + site)
-                    #window_handles.pop(site)
-                    websites_parsed[site] = True
+                is_done = check_parse_new_link(site, is_done)
 
         except Exception as e: 
             crossparser_tools.write_to_log('failed to check or initiate link of site: ' + site)
+            current_link = current_links[site]
+            crossparser_tools.write_to_log('Failed to parse link: ' + current_link)
             crossparser_tools.write_to_log(str(e))
 
 
@@ -345,6 +357,23 @@ def start_checking():
     if is_done == False:
         start_checking()
 
+
+def check_parse_new_link(site, is_done):
+    #Start parse new link:
+    global websites_parsed
+    global tabs_delay
+
+    link = get_nextlink_forsite(site)
+    if link != '':
+        tabs_delay[site] = datetime.datetime.now()
+        parse_link(site, link)
+        is_done = False
+    else:
+        crossparser_tools.write_to_log('Done parse all links for site: ' + site)
+        #window_handles.pop(site)
+        websites_parsed[site] = True
+
+    return is_done
 
 
 def parsnew():
