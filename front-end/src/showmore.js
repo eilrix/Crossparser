@@ -53,7 +53,7 @@ class PageHandler {
 
     getReadyToShowMore() {
         if ($('.pagination li.active').next('li').children('a').length > 0) {
-            $('.pagination').before('<div id="showmore" class="showmoreBtn" style="padding-bottom: 15px;"><a id="showmore-text-btn" onclick="showmore()">Показать еще</a><img id="load-more-gif"  style="display: none; margin: 0px auto;" src="image/loading.gif"></div>');
+            $('.pagination').before('<div id="showmore" class="showmoreBtn" style="padding-bottom: 15px;"><a id="showmore-text-btn" onclick="window.pageHandler.showmore()">Показать еще</a><img id="load-more-gif"  style="display: none; margin: 0px auto;" src="image/loading.gif"></div>');
         }
 
         //$("img.lazy").lazyload();
@@ -160,7 +160,7 @@ class PageHandler {
             bindEffectForCButton();
 
         }, "html");
-        startLoadingAnimation();
+        this.startLoadingAnimation();
         return false;
     }
 
@@ -178,6 +178,7 @@ class PageHandler {
         textBtn.css("display", "block");
         imgObj.css("display", "none");
     }
+
 
     autoLoadInScroll() {
         var flag = true;
@@ -213,6 +214,9 @@ class PageHandler {
     }
 
     loadMoreIfNotEnough() {
+
+        /////////  temp
+        return;
 
         if (document.getElementById('autofeatured_settings') && this.autof_settings == '') {
             this.autof_settings = document.getElementById('autofeatured_settings').innerText;
@@ -279,6 +283,7 @@ class PageHandler {
 
 
     loadAutoFeatured() {
+
 
         if (!this.isProductPage) {
             // Only in cat and search page. Get first product id
@@ -426,6 +431,10 @@ class PageHandler {
             this.stopLoadingAnimation();
         })
 
+    }
+
+    lazyLoad() {
+        $("img.lazy").lazyload();
     }
 
 }

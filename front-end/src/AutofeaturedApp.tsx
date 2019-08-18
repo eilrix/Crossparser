@@ -12,6 +12,7 @@ interface State {
   productsLoaded: number;
   prodId: undefined | number;
   autof_settings: string | undefined;
+  isDisplaying: boolean;
   displayData: JSX.Element[];
 }
 
@@ -28,13 +29,12 @@ class AutofeaturedApp extends React.Component<Props, State> {
       productsLoaded: 0,
       prodId: undefined,
       autof_settings: undefined,
+      isDisplaying: false,
       displayData: []
     }
   }
 
   componentDidMount() {
-
-    console.log('AutofeaturedApp componentDidMount');
 
     let autof_settingsDiv = document.getElementById('autofeatured_settings');
     let autof_settings: string | undefined;
@@ -65,7 +65,13 @@ class AutofeaturedApp extends React.Component<Props, State> {
     console.log('isSearchPage', isSearchPage, 'isCatPage', isCatPage, 'isProductPage', isProductPage, 'prodId', prodId);
     console.log('autof_settings', autof_settings);
 
-    if (autof_settings) {
+    let isDisplaying = true;
+    if (!prodId || !autof_settings) {
+      console.log('loadAutoFeatured: Invalid settings');
+      isDisplaying = false;
+    }
+
+    if (isDisplaying) {
       this.setState({
         selectedTab: 'autofeatured',
         autof_settings: autof_settings,
@@ -73,17 +79,19 @@ class AutofeaturedApp extends React.Component<Props, State> {
         isProductPage: isProductPage ? true : false,
         isCatPage: isCatPage ? true : false,
         prodId: prodId,
+        isDisplaying: isDisplaying,
         displayData: []
       }, this.loadAutoFeatured);
     }
-    (window as any).AutofeaturedApp = this
+    (window as any).AutofeaturedApp = this;
   }
 
 
   loadAutoFeatured = () => {
 
-    if (!this.state.prodId || !this.state.autof_settings) {
-      console.log('loadAutoFeatured: Invalid settings')
+    if (!this.state.isDisplaying) {
+      console.log('loadAutoFeatured: Invalid settings');
+      return;
     }
 
     var formData = new FormData();
@@ -105,6 +113,9 @@ class AutofeaturedApp extends React.Component<Props, State> {
 
     let displayData = (text: string) => {
       console.log(text);
+      var regex = /onclick=/gi;
+      text = text.replace(regex, 'onClick=');
+      
       this.setState((prevState) => {
         let disArr = prevState.displayData;
 
@@ -113,8 +124,14 @@ class AutofeaturedApp extends React.Component<Props, State> {
         return { displayData: disArr };
       }, imgLazyLoadInit)
     }
-    let imgLazyLoadInit = () => {
 
+    let imgLazyLoadInit = () => {
+      try {
+        let func = ((window as any).pageHandler as any).lazyLoad;
+        setTimeout(func, 1000);
+      } catch (error) {
+        console.error(error);
+      }
     }
 
 
@@ -122,22 +139,29 @@ class AutofeaturedApp extends React.Component<Props, State> {
 
   render() {
 
-    return (
-      <div className="App">
-        <h3 className="autofeaturedText autofeatured-selected">
-          <a id="autofeatured_btn">Рекомендуемые товары</a>
-          <a id="imagematch_btn">Визуально похожие товары</a>
-        </h3>
+    if (this.state.isDisplaying) {
+      return (
+        <div className="App">
+          <h3 className="autofeaturedText autofeatured-selected">
+            <a id="autofeatured_btn">Рекомендуемые товары</a>
+            <a id="imagematch_btn">Визуально похожие товары</a>
+          </h3>
 
-        <div id="products-load-container">{this.state.displayData}</div>
+          <div id="products-load-container">{this.state.displayData}</div>
 
-        <div id="showmore" className="showmoreBtn col-sm-12">
-          <a id="showmore-text-btn" onClick={this.loadAutoFeatured}>Показать еще</a>
-          <img id="load-more-gif" style={{ display: "none" }} src="image/loading.gif" />
+          <div id="showmore" className="showmoreBtn col-sm-12">
+            <a id="showmore-text-btn" onClick={this.loadAutoFeatured}>Показать еще</a>
+            <img id="load-more-gif" style={{ display: "none" }} src="image/loading.gif" />
+          </div>
+
         </div>
-
-      </div>
-    );
+      );
+    }
+    else {
+      return (
+        <div className="App"></div>
+      )
+    }
   }
 }
 
