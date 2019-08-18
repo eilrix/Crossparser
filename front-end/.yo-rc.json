@@ -1,5 +1,5 @@
 {
-  "crossparser-frontend": {
+  "my-app": {
     "configuration": {
       "config": {
         "configName": "config",
@@ -14,7 +14,7 @@
         ],
         "webpackOptions": {
           "mode": "'development'",
-          "entry": "'./src/showmore.js'",
+          "entry": "'./src/index.ts'",
           "output": {
             "filename": "'[name].[chunkhash].js'",
             "path": "path.resolve(__dirname, 'dist')"
@@ -26,24 +26,14 @@
           "module": {
             "rules": [
               {
-                "test": "/.(js|jsx)$/",
+                "test": "/.(ts|tsx)?$/",
+                "loader": "'ts-loader'",
                 "include": [
                   "path.resolve(__dirname, 'src')"
                 ],
-                "loader": "'babel-loader'",
-                "options": {
-                  "plugins": [
-                    "'syntax-dynamic-import'"
-                  ],
-                  "presets": [
-                    [
-                      "'@babel/preset-env'",
-                      {
-                        "'modules'": false
-                      }
-                    ]
-                  ]
-                }
+                "exclude": [
+                  "/node_modules/"
+                ]
               }
             ]
           },
@@ -63,6 +53,13 @@
           },
           "devServer": {
             "open": true
+          },
+          "resolve": {
+            "extensions": [
+              "'.tsx'",
+              "'.ts'",
+              "'.js'"
+            ]
           }
         }
       }

@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const nodeExternals = require('webpack-node-externals');
 
 /*
  * SplitChunksPlugin is enabled by default and replaced
@@ -27,82 +26,28 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
  */
 
 module.exports = {
-	//mode: 'development',
-	mode: 'production',
-	entry: './src/showmore.js',
-	/*entry: './src/index.js',*/
+	mode: 'development',
+	entry: './src/index.tsx',
 
 	output: {
 		filename: '[name].[chunkhash].js',
 		path: path.resolve(__dirname, 'dist')
 	},
-	//watch:true,
-	/*
-	target: 'node',
-    externals: [nodeExternals({
-		whitelist: [/\.js/]
-	})],*/
 
-	plugins: [
+	plugins: [		
 		new webpack.ProgressPlugin(), 
 		new HtmlWebpackPlugin({
 			'template': './public/index.html'
-		}),
-		/*
-		new webpack.ProvidePlugin({
-            $: "jquery",
-            jQuery: "jquery"
-		}),*/
-		//new webpack.SourceMapDevToolPlugin({})
-	],
+		})],
 
 	module: {
 		rules: [
 			{
-				test: /.(js|jsx)$/,
+				test: /.(ts|tsx)?$/,
+				loader: 'ts-loader',
 				include: [path.resolve(__dirname, 'src')],
-				loader: 'babel-loader',
-
-				options: {
-					plugins: ['syntax-dynamic-import'],
-
-					presets: [
-						[
-							'@babel/preset-env',
-							{
-								modules: false
-							}
-						]
-					]
-				}
-			},
-			/*{
-				// Exposes jQuery for use outside Webpack build
-				test: require.resolve('jquery'),
-				use: [{
-				  loader: 'expose-loader',
-				  options: 'jQuery'
-				},{
-				  loader: 'expose-loader',
-				  options: '$'
-				}]
-			},*/
-			{
-                test: /\.html$/,
-                use: [
-                  {
-                    loader: "html-loader"
-                  }
-                ]
-              },
-              {
-                test: /\.css$/i,
-                use: ['style-loader', 'css-loader'],
-              },
-              {
-                test: /\.svg$/,
-                loader: 'svg-inline-loader'
-              }
+				exclude: [/node_modules/]
+			}
 		]
 	},
 
@@ -124,5 +69,9 @@ module.exports = {
 
 	devServer: {
 		open: true
+	},
+
+	resolve: {
+		extensions: ['.tsx', '.ts', '.js']
 	}
 };

@@ -1,14 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+import AutofeaturedApp from './AutofeaturedApp';
 import * as serviceWorker from './serviceWorker';
-import PageHandle from './showmore'
+import PageHandler from './showmore'
+
+/*
+$(document).ready(function () {
+
+    let pageHandler = new PageHandler();
+
+    window.pageHandler = pageHandler;
+    
+    pageHandler.init();
+});*/
+
+ReactDOM.render(<AutofeaturedApp />, document.getElementById('root'));
 
 
-ReactDOM.render(<App />, document.getElementById('root'));
 
-window.pageHandler = new PageHandle();
+
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
