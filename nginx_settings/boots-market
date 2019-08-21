@@ -1,0 +1,108 @@
+
+server {
+    server_name boots-market.ru;
+    root /var/www/html/boots-market;
+    index index.php index.html;
+    listen 443 default ssl;
+
+    include snippets/phpmyadmin.conf;
+
+    access_log /var/log/nginx/myopencart_access.log;
+
+    location /image/data {
+        autoindex on;
+    }
+    location /admin {
+        index index.php;
+    }
+    location / {
+        try_files $uri @opencart;
+    }
+    location @opencart {
+        rewrite ^/(.+)$ /index.php?_route_=$1 last;
+    }
+
+    # Make sure files with the following extensions do not get loaded by nginx because nginx would display the source code, and these files can contain PASSWORDS!
+    location ~* \.(engine|inc|info|install|make|module|profile|test|po|sh|.*sql|theme|tpl(\.php)?|xtmpl)$|^(\..*|Entries.*|Repository|Root|Tag|Template)$|\.php_ {
+        deny all;
+    }
+    # Deny all attempts to access hidden files such as .htaccess, .htpasswd, .DS_Store (Mac).
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    location ~ /(crossparser) {
+       deny all;
+       return 404;
+    }
+    location ~*  \.(jpg|jpeg|png|gif|css|js|ico)$ {
+        expires max;
+        log_not_found off;
+    }
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_read_timeout 3000;
+    }
+
+    location ~ /ajaxGetProduct {
+     if ($request_method = 'OPTIONS') {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        #
+        # Custom headers and headers various browsers *should* be OK with but aren't
+        #
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
+        #
+        # Tell client that this pre-flight info is valid for 20 days
+        #
+        add_header 'Access-Control-Max-Age' 1728000;
+        add_header 'Content-Type' 'text/plain; charset=utf-8';
+        add_header 'Content-Length' 0;
+        return 204;
+     }
+     if ($request_method = 'POST') {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
+        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+     }
+     if ($request_method = 'GET') {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
+        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+     }
+    }
+
+    ssl_certificate /etc/letsencrypt/live/boots-market.ru/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/boots-market.ru/privkey.pem; # managed by Certbot
+
+
+    client_max_body_size 100M;
+    client_body_buffer_size 100M;
+    client_header_timeout 3m;
+    client_body_timeout 3m;
+    send_timeout 3m;
+    proxy_connect_timeout       600;
+    proxy_send_timeout          600;
+    proxy_read_timeout          600;
+
+    #rewrite ^/$ https://boots-market.ru/krossovki/ redirect;
+}
+
+server {
+    if ($host = boots-market.ru) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    server_name boots-market.ru;
+
+    listen 80;
+    listen [::]:80;
+    return 404; # managed by Certbot
+}
