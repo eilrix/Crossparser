@@ -1,5 +1,6 @@
 import React from 'react';
-
+import productData from './dataTypes';
+import Product from './Product'
 
 interface Props {
   prodId: string | undefined;
@@ -62,8 +63,8 @@ class AutofeaturedApp extends React.Component<Props, State> {
       }
     }
 
-    console.log('isSearchPage', isSearchPage, 'isCatPage', isCatPage, 'isProductPage', isProductPage, 'prodId', prodId);
-    console.log('autof_settings', autof_settings);
+    //console.log('isSearchPage', isSearchPage, 'isCatPage', isCatPage, 'isProductPage', isProductPage, 'prodId', prodId);
+    //console.log('autof_settings', autof_settings);
 
     let isDisplaying = true;
     if (!prodId || !autof_settings) {
@@ -78,11 +79,13 @@ class AutofeaturedApp extends React.Component<Props, State> {
         isSearchPage: isSearchPage ? true : false,
         isProductPage: isProductPage ? true : false,
         isCatPage: isCatPage ? true : false,
+        productsLoaded: 0,
         prodId: prodId,
         isDisplaying: isDisplaying,
         displayData: []
       }, this.loadAutoFeatured);
     }
+    // Debug mode
     (window as any).AutofeaturedApp = this;
   }
 
@@ -96,11 +99,8 @@ class AutofeaturedApp extends React.Component<Props, State> {
 
     var formData = new FormData();
     formData.append('prodId', this.state.prodId + '');
-    formData.append('autof_settings', (this.state.autof_settings as string));
-    formData.append('productsLoaded', '0');
-
-    (window as any).formData = formData;
-    (window as any).autof_settings = this.state.autof_settings;
+    formData.append('autof_settings', this.state.autof_settings + '');
+    formData.append('productsLoaded', this.state.productsLoaded + '');
 
     fetch('index.php?route=extension/module/autofeatured/ajaxGetProduct', {
       method: 'post',
@@ -112,16 +112,36 @@ class AutofeaturedApp extends React.Component<Props, State> {
       });
 
     let displayData = (text: string) => {
+      console.log('text1');
       console.log(text);
-      var regex = /onclick=/gi;
-      text = text.replace(regex, 'onClick=');
-      
+
+      let data: productData[] = JSON.parse(text);
+      console.log('data');
+      console.log(data);
+
+      let products : JSX.Element[] = [];
+
+      if (data != undefined && data.length > 0)
+      {
+        products = data.map( (data: productData): JSX.Element => {
+          return (
+                <Product data={data}/>
+          )
+        })
+      }
+
+      console.log('products');
+      console.log(products);
+
       this.setState((prevState) => {
         let disArr = prevState.displayData;
 
-        disArr.push(<div key={disArr.length}>{require('html-react-parser')(text)}</div>);
+        disArr.push(<div key={disArr.length}>{products}</div>);
 
-        return { displayData: disArr };
+        return { 
+          displayData: disArr,
+          productsLoaded:  prevState.productsLoaded + 40
+        };
       }, imgLazyLoadInit)
     }
 

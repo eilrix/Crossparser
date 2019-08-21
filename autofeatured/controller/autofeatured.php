@@ -208,11 +208,14 @@ class ControllerExtensionModuleAutoFeatured extends Controller {
                     'tax'         => $tax,
                     'rating'      => $rating,
                     'href'        => $this->url->link('product/product', 'product_id=' . $product_info['product_id']),
-                    'settings'    => json_encode($setting)
+                    /*'settings'    => json_encode($setting)*/
                 );
             }
         }
-
+        if ($data['products']) {
+            return json_encode($data['products']);
+        }
+        /*
         if ($data['products']) {
             if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/extension/module/autofeatured.tpl')) {
                 return $this->load->view($this->config->get('config_template') . '/template/extension/module/autofeatured.tpl', $data);
@@ -222,6 +225,7 @@ class ControllerExtensionModuleAutoFeatured extends Controller {
                 return $this->load->view('/extension/module/autofeatured.tpl', $data);
             }
         }
+        */
 
     }
 
