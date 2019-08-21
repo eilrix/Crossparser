@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import productData from './dataTypes';
 import Product from './Product'
 
@@ -15,6 +15,7 @@ interface State {
   autof_settings: string | undefined;
   isDisplaying: boolean;
   displayData: JSX.Element[];
+  isLoading: boolean;
 }
 
 class AutofeaturedApp extends React.Component<Props, State> {
@@ -31,7 +32,8 @@ class AutofeaturedApp extends React.Component<Props, State> {
       prodId: undefined,
       autof_settings: undefined,
       isDisplaying: false,
-      displayData: []
+      displayData: [],
+      isLoading: false
     }
   }
 
@@ -112,35 +114,32 @@ class AutofeaturedApp extends React.Component<Props, State> {
       });
 
     let displayData = (text: string) => {
-      console.log('text1');
-      console.log(text);
+      //console.log('text1');
+      //console.log(text);
 
       let data: productData[] = JSON.parse(text);
-      console.log('data');
-      console.log(data);
 
-      let products : JSX.Element[] = [];
+      let products: JSX.Element[] = [];
 
-      if (data != undefined && data.length > 0)
-      {
-        products = data.map( (data: productData): JSX.Element => {
+      if (data != undefined && data.length > 0) {
+        products = data.map((data: productData): JSX.Element => {
           return (
-                <Product data={data}/>
+            <Product data={data} />
           )
         })
       }
 
-      console.log('products');
-      console.log(products);
+      //console.log('products');
+      //console.log(products);
 
       this.setState((prevState) => {
         let disArr = prevState.displayData;
 
         disArr.push(<div key={disArr.length}>{products}</div>);
 
-        return { 
+        return {
           displayData: disArr,
-          productsLoaded:  prevState.productsLoaded + 40
+          productsLoaded: prevState.productsLoaded + 40
         };
       }, imgLazyLoadInit)
     }
@@ -157,21 +156,64 @@ class AutofeaturedApp extends React.Component<Props, State> {
 
   }
 
+
+  changeTabHandler = (event: MouseEvent<HTMLElement>) => {
+
+    let setTabTo = ''
+    if ((event.target as HTMLElement).id == 'autofeatured_btn') {
+      setTabTo = 'autofeatured-selected';
+    }
+    else {
+      setTabTo = 'imgmatch-selected'
+    }
+
+    if (this.state.selectedTab != setTabTo) {
+      this.setState({
+        displayData: [],
+        selectedTab: setTabTo
+      }, this.loadAutoFeatured)
+    }
+
+
+  }
+
   render() {
+
+    let autofeatured_btn_cls = '';
+    let imagematch_btn_cls = '';
+    this.state.selectedTab == 'autofeatured' ?
+      autofeatured_btn_cls = 'autofeatured-selected' :
+      imagematch_btn_cls = 'autofeatured-selected';
+
+    let loaderCSS, btnCSS;
+    if (this.state.isLoading) {
+      loaderCSS = {};
+      btnCSS = { display: "none" }
+    }
+    else {
+      loaderCSS = { display: "none" };
+      btnCSS = {};
+    }
 
     if (this.state.isDisplaying) {
       return (
         <div className="App">
-          <h3 className="autofeaturedText autofeatured-selected">
-            <a id="autofeatured_btn">Рекомендуемые товары</a>
-            <a id="imagematch_btn">Визуально похожие товары</a>
+          <h3 className="autofeaturedText ">
+            <a id="autofeatured_btn" 
+            className={autofeatured_btn_cls} 
+            onClick={this.changeTabHandler}
+            key="1">Рекомендуемые товары</a>
+            <a id="imagematch_btn" 
+            className={imagematch_btn_cls} 
+            onClick={this.changeTabHandler}
+            key="2">Визуально похожие товары</a>
           </h3>
 
           <div id="products-load-container">{this.state.displayData}</div>
 
           <div id="showmore" className="showmoreBtn col-sm-12">
-            <a id="showmore-text-btn" onClick={this.loadAutoFeatured}>Показать еще</a>
-            <img id="load-more-gif" style={{ display: "none" }} src="image/loading.gif" />
+            <a id="showmore-text-btn" onClick={this.loadAutoFeatured} style={btnCSS}>Показать еще</a>
+            <img id="load-more-gif" style={loaderCSS} src="image/loading.gif" />
           </div>
 
         </div>

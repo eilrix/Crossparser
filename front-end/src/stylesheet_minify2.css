@@ -243,6 +243,7 @@ input.form-control{
 }
 
 #showmore a {
+    display: block;
     background: #333;
     border-radius: 30px;
     color: #fff;

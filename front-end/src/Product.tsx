@@ -17,13 +17,13 @@ class Product extends React.Component<Props, State> {
 
         let price;
         if (!data.special) {
-            price = <div>{data.price}</div>
+            price = <span>{data.price}</span>
         }
         else {
-            price = <div>
-                <span className="price-new">{data.special}</span>
-                <span className="price-old">{data.price}</span>
-            </div>
+            price = <span>
+                        <span className="price-new">{data.special}</span>
+                        <span className="price-old">{data.price}</span>
+                    </span>
         }
 
         return (
