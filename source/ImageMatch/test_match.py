@@ -4,16 +4,27 @@ from image_match.goldberg import ImageSignature
 from elasticsearch import Elasticsearch
 from image_match.elasticsearch_driver import SignatureES
 import statistics
-import sys
+import sys, os
 import json
+
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+import crossparser_tools
+
+temp_folder = crossparser_tools.temp_folder
+config_folder = crossparser_tools.config_folder
+data_folder = crossparser_tools.data_folder
+website_root = crossparser_tools.website_root
+proj_root_dir = crossparser_tools.proj_root_dir
+
+img_folder = crossparser_tools.img_folder
+img_module_folder = crossparser_tools.img_module_folder
 
 
 img_db_products = {}
 
 dist_cutoff = 0.7
 
-data_folder = '/var/www/html/boots-market/crossparser/data/'
-folder_imgs = '/var/www/html/boots-market/image/catalog/product/'
 
 def one_img_search(img):
     res = ses.search_image(img)
@@ -98,7 +109,7 @@ def search_products_for(prod_id):
 
     for img, id in img_db_products.items():
         if prod_id == id:
-            imgs.append(folder_imgs + img)
+            imgs.append(img_folder + img)
 
     if len(imgs) == 0:
         print('No image found')
@@ -119,15 +130,21 @@ def search_products_for(prod_id):
 
 if __name__ == '__main__':
 
+    parse_img_db()
+
     if len(sys.argv) == 2:
         prod_id = sys.argv[1]
     else:
-        prod_id = '219720bed2MP002XW1GZVD'
+        if len(img_db_products) > 0:
+            prod_id = img_db_products[next(iter(img_db_products))]
+        else:
+            prod_id = '219720bed2MP002XW1GZVD'
+
+    #print('prod_id', prod_id)
 
     es = Elasticsearch()
     ses = SignatureES(es, distance_cutoff=5.0)
 
-    parse_img_db()
 
     print(json.dumps(search_products_for(prod_id)))
 

@@ -160,5 +160,15 @@ class ModelExtensionModuleAutoFeatured extends Model {
         return $product_data;
 
     }
+    public function getProductSkuFromId($product_id)
+    {
+        $sql = "SELECT sku FROM " . DB_PREFIX . "product WHERE product_id ='" . $product_id . "'";
+
+        $query = $this->db->query($sql);
+
+        foreach ($query->rows as $result) {
+            return $result['sku'];
+        }
+    }
 	
 }

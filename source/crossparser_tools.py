@@ -16,14 +16,25 @@ if '/' in dirpath:
 if '\\' in dirpath:
     proj_root_dir = dirpath.split('\\')
 
+# Root folders
+website_root = ('/').join(proj_root_dir[0 : -2]) + '/'
 proj_root_dir = ('/').join(proj_root_dir[0 : -1]) + '/'
 
+file_dir_loc = dirpath + '/'
 
+# Parser's folders
 temp_folder = proj_root_dir + 'temp/'
 config_folder = proj_root_dir + 'config/'
 data_folder = proj_root_dir + 'data/'
 
 file_of_raw_catalogs = temp_folder + 'files_to_parse.txt'
+
+
+# Images folders
+img_folder_def = 'image/catalog/product/'
+img_module_folder = 'catalog/product/'
+
+img_folder = website_root + img_folder_def
 
 
 if not os.path.exists(temp_folder):
@@ -34,7 +45,7 @@ if not os.path.exists(data_folder):
 
 
 
-file_dir_loc = dirpath + '/'
+
 
 
 table_titles_list = []

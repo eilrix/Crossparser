@@ -99,6 +99,8 @@ class AutofeaturedApp extends React.Component<Props, State> {
       return;
     }
 
+    this.setState({isLoading: true});
+
     let request_url = '';
     if (this.state.selectedTab === autofeatured_str) {
       request_url = 'index.php?route=extension/module/autofeatured/ajaxGetProduct';

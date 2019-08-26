@@ -15,8 +15,11 @@ import crossparser_tools
 temp_folder = crossparser_tools.temp_folder
 config_folder = crossparser_tools.config_folder
 data_folder = crossparser_tools.data_folder
-img_folder = 'image/catalog/product/'
-img_module_folder = 'catalog/product/'
+
+#img_folder = 'image/catalog/product/'
+img_folder = crossparser_tools.img_folder
+#img_module_folder = 'catalog/product/'
+img_module_folder = crossparser_tools.img_module_folder
 
 
 is_checking = True
@@ -59,7 +62,7 @@ items_counter_converted = 0
 csv_out_data_counter = 0
 
 
-
+#Parse configs
 def parse_img_db():
     if os.path.isfile(data_folder + 'img_db'):
         with open(data_folder + 'img_db', 'r') as cr_file:
@@ -428,7 +431,8 @@ def image_check(img):
         img_name = crossparser_tools.get_rand_uniqid(15)
         img_name = img_name + '.jpg'
 
-        file_path = website_root + img_folder + img_name
+        #file_path = website_root + img_folder + img_name
+        file_path = img_folder + img_name
 
         print('downloading img: ' + img)
         print('save to: ' + file_path)
@@ -863,8 +867,8 @@ parse_img_db()
 
 website_root = credentials['website_root']
 
-if not os.path.exists(website_root + img_folder):
-    os.makedirs(website_root + img_folder)
+if not os.path.exists(img_folder):
+    os.makedirs(img_folder)
 
 
 if credentials['is_server'] == 'yes':

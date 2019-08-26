@@ -25,3 +25,4 @@ os.remove(data_folder + 'img_db_info.txt')
 if credentials['is_server'] == 'yes':
     import image_match_add
     image_match_add.purge_imgs()
+    os.system('sudo chmod -R 777 /var/www/html/boots-market/image')

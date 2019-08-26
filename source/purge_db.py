@@ -1,13 +1,14 @@
 
 import mysql.connector
 import shutil
-import os.path
+import os
 import crossparser_tools
 
 
 credentials = crossparser_tools.parse_credentials()
 temp_folder = crossparser_tools.temp_folder
 config_folder = crossparser_tools.config_folder
+data_folder = crossparser_tools.data_folder
 
 sql_query = ''
 
@@ -29,6 +30,16 @@ def clear_db():
     global sql_query
     parse_sql_query()
     #print(sql_query)
+
+    #delete temp files
+    if os.path.isfile(data_folder + 'partner_links'):
+        os.remove(data_folder + 'partner_links')
+
+    cat_menu = data_folder + 'category_menu.txt'
+    if os.path.isfile(cat_menu):
+        os.remove(cat_menu)
+        open(cat_menu, 'a').close()
+
 
     mydb = mysql.connector.connect(
       host='localhost',

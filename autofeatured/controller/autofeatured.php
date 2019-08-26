@@ -259,8 +259,12 @@ class ControllerExtensionModuleAutoFeatured extends Controller {
         $productId = $_POST['prodId'];
         $settings  = json_decode($_POST['autof_settings'], true);
 
-        $scrip_path = '/var/www/html/boots-market/ImageMatch/test_match.py';
-        $command = escapeshellcmd("python3 $scrip_path $productId");
+        $this->load->model('extension/module/autofeatured');
+        $prod_sku = $this->model_extension_module_autofeatured->getProductSkuFromId($productId);
+
+        //$scrip_path = '/var/www/html/boots-market/ImageMatch/test_match.py';
+        $scrip_path = '/var/www/html/boots-market/crossparser/source/ImageMatch/test_match.py';
+        $command = escapeshellcmd("python3 $scrip_path $prod_sku");
         $py_output = shell_exec($command);
 
         $products = json_decode($py_output, true);
@@ -272,7 +276,7 @@ class ControllerExtensionModuleAutoFeatured extends Controller {
             $products_id[] = $product["prod_id"];
         }
 
-        $this->load->model('extension/module/autofeatured');
+
 
         $results = $this->model_extension_module_autofeatured->getProductImgMatch($products_id);
 
