@@ -1,5 +1,5 @@
 import React, { MouseEvent } from 'react';
-import productData from './dataTypes';
+import productData from '../dataTypes';
 import Product from './Product'
 
 interface Props {

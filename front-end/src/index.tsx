@@ -2,8 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
-import AutofeaturedApp from './AutofeaturedApp';
-import PageHandler from './showmore';
+import AutofeaturedApp from './components/AutofeaturedApp';
+import PageHandler from './category-js/showmore';
 
 window.addEventListener("load", loadApp);
 

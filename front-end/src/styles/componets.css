@@ -1,0 +1,86 @@
+#LoadMoreHere {
+  background: #fff;
+  box-shadow: 0 1px 9px rgba(0, 0, 0, .10);
+  margin: 0;
+  padding: 1px 0px;
+}
+.row.autofeatured {
+  margin: 0;
+}
+.oct-carousel-box .subcat-header, #oct-related .item .cart .button-cart, #oct-favorite-content .item .cart .button-cart, #oct-last-seen-content .item .cart .button-cart {
+  display: none;
+}
+.oct-discount-item {
+  box-shadow: 0 1px 9px rgba(0, 0, 0, .20);
+}
+#oct-related .item .name a, #oct-favorite-content .item .name a, #oct-last-seen-content .item .name a {
+  margin: 10px 0 0 0;
+  width: 100%;
+}
+#oct-related .item .price, #oct-favorite-content .item .price, #oct-last-seen-content .item .price {
+  display: block;
+  float: left;
+  width: 50%;
+  padding-left: 30px;
+}
+#oct-related .item .cart, #oct-favorite-content .item .cart, #oct-last-seen-content .item .cart {
+  position: relative;
+  display: block;
+  float: right;
+  width: 50%;
+  height: 50px;
+  top: -10px;
+  right: 10%;
+}
+#button-search.oct-button {
+  padding: 10px 50px;
+  border-radius: 30px;
+  box-shadow: 0 1px 9px rgba(0, 0, 0, .20);
+  border: 1px solid #333;
+  transition: 0.5s;
+}
+#button-search.oct-button:hover {
+  background: #fff;
+  color: #333;
+}
+
+.product-thumb .price .common-price {
+  margin: 0;
+  font-weight: 900;
+}
+.autofeatured .product-thumb .price, .autofeatured .oct-price-normal {
+  padding: 0;
+}
+#backlinks-to-cat .backlink-to-categ {
+  margin: 5px;
+  border: 1px solid #333;
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 30px;
+  text-decoration: none!important;
+  color: #000;
+  transition: 0.5s;
+}
+#backlinks-to-cat .backlink-to-categ:hover {
+  color: #fff;
+  background: #333;
+}
+#content.account-content .oct-button {
+  color: #fff!important;
+}
+#content.account-content .goto-signin, #content.account-content #input-password + a {
+  text-decoration: underline;
+}
+#content.account-content #input-password {
+  margin-bottom: 20px;
+}
+
+#showmore {
+  display: block;
+  margin: 0 auto;
+}
+
+#showmore:hover a{
+  background: #ff5d68;
+  color: #fff;
+}
