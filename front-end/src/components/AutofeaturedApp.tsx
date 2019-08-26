@@ -1,5 +1,5 @@
 import React, { MouseEvent } from 'react';
-import productData from '../dataTypes';
+import productData, {autofeatured_str} from '../dataTypes';
 import Product from './Product'
 
 interface Props {
@@ -24,7 +24,7 @@ class AutofeaturedApp extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      selectedTab: 'autofeatured',
+      selectedTab: autofeatured_str,
       isSearchPage: false,
       isCatPage: false,
       isProductPage: false,
@@ -76,7 +76,7 @@ class AutofeaturedApp extends React.Component<Props, State> {
 
     if (isDisplaying) {
       this.setState({
-        selectedTab: 'autofeatured',
+        selectedTab: autofeatured_str,
         autof_settings: autof_settings,
         isSearchPage: isSearchPage ? true : false,
         isProductPage: isProductPage ? true : false,
@@ -99,12 +99,20 @@ class AutofeaturedApp extends React.Component<Props, State> {
       return;
     }
 
+    let request_url = '';
+    if (this.state.selectedTab === autofeatured_str) {
+      request_url = 'index.php?route=extension/module/autofeatured/ajaxGetProduct';
+    }
+    else {
+      request_url = 'index.php?route=extension/module/autofeatured/ajaxGetImgMatched';
+    }
+
     var formData = new FormData();
     formData.append('prodId', this.state.prodId + '');
     formData.append('autof_settings', this.state.autof_settings + '');
     formData.append('productsLoaded', this.state.productsLoaded + '');
 
-    fetch('index.php?route=extension/module/autofeatured/ajaxGetProduct', {
+    fetch(request_url, {
       method: 'post',
       body: formData
     }).then((res) => res.text())
@@ -135,7 +143,9 @@ class AutofeaturedApp extends React.Component<Props, State> {
       this.setState((prevState) => {
         let disArr = prevState.displayData;
 
-        disArr.push(<div key={disArr.length}>{products}</div>);
+        products.forEach( prod => {
+          disArr.push(prod);
+        })
 
         return {
           displayData: disArr,
@@ -161,16 +171,17 @@ class AutofeaturedApp extends React.Component<Props, State> {
 
     let setTabTo = ''
     if ((event.target as HTMLElement).id == 'autofeatured_btn') {
-      setTabTo = 'autofeatured-selected';
+      setTabTo = autofeatured_str;
     }
     else {
-      setTabTo = 'imgmatch-selected'
+      setTabTo = 'imgmatch'
     }
 
     if (this.state.selectedTab != setTabTo) {
       this.setState({
         displayData: [],
-        selectedTab: setTabTo
+        selectedTab: setTabTo,
+        productsLoaded: 0
       }, this.loadAutoFeatured)
     }
 
@@ -181,7 +192,7 @@ class AutofeaturedApp extends React.Component<Props, State> {
 
     let autofeatured_btn_cls = '';
     let imagematch_btn_cls = '';
-    this.state.selectedTab == 'autofeatured' ?
+    this.state.selectedTab == autofeatured_str ?
       autofeatured_btn_cls = 'autofeatured-selected' :
       imagematch_btn_cls = 'autofeatured-selected';
 
@@ -197,8 +208,8 @@ class AutofeaturedApp extends React.Component<Props, State> {
 
     if (this.state.isDisplaying) {
       return (
-        <div className="App">
-          <h3 className="autofeaturedText ">
+        <div className="row">
+          <h3 className="row autofeaturedText ">
             <a id="autofeatured_btn" 
             className={autofeatured_btn_cls} 
             onClick={this.changeTabHandler}
@@ -209,7 +220,8 @@ class AutofeaturedApp extends React.Component<Props, State> {
             key="2">Визуально похожие товары</a>
           </h3>
 
-          <div id="products-load-container">{this.state.displayData}</div>
+          <div className="row" 
+          id="products-load-container">{this.state.displayData}</div>
 
           <div id="showmore" className="showmoreBtn col-sm-12">
             <a id="showmore-text-btn" onClick={this.loadAutoFeatured} style={btnCSS}>Показать еще</a>

@@ -10,3 +10,5 @@ export default interface productData {
         "rating": number;
         "href": string;
 }
+
+export let autofeatured_str = 'autofeatured';

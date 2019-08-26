@@ -133,7 +133,7 @@ class PageHandler {
                 $('#showmore').hide();
             }
 
-            $data.filter('script').each(function () {
+            $data.filter('script').each( () => {
                 if ((this.text || this.textContent || this.innerHTML).indexOf("document.write") >= 0) {
                     return;
                 }
@@ -352,7 +352,7 @@ class PageHandler {
             type: "POST",
             url: 'index.php?route=extension/module/autofeatured/ajaxGetImgMatched',
             data: dataSend
-        }).done(function (data) {
+        }).done( (data) => {
             console.log('post: ', data);
             this.stopLoadingAnimation();
 
@@ -385,7 +385,7 @@ class PageHandler {
             type: "POST",
             url: 'index.php?route=extension/module/autofeatured/ajaxGetProduct',
             data: dataSend
-        }).done(function (data) {
+        }).done( (data) => {
             console.log('post: ', data);
             this.stopLoadingAnimation();
 
@@ -395,7 +395,7 @@ class PageHandler {
             }
 
             $(spawnBlock).append(data);
-        }).fail(function () {
+        }).fail(() => {
             console.log("error");
             this.stopLoadingAnimation();
         })
@@ -416,7 +416,7 @@ class PageHandler {
             type: "POST",
             url: 'index.php?route=extension/module/autofeatured/ajaxGetImgMatched',
             data: dataSend
-        }).done(function (data) {
+        }).done( (data) => {
             console.log('post: ', data);
             this.stopLoadingAnimation();
 
@@ -426,7 +426,7 @@ class PageHandler {
             }
 
             $(spawnBlock).append(data);
-        }).fail(function () {
+        }).fail( () => {
             console.log("error");
             this.stopLoadingAnimation();
         })
