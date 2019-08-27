@@ -1,5 +1,5 @@
-import React, { MouseEvent } from 'react';
-import productData, {autofeatured_str} from '../dataTypes';
+import React, { MouseEvent, RefObject } from 'react';
+import productData, { autofeatured_str } from '../dataTypes';
 import Product from './Product'
 
 interface Props {
@@ -16,12 +16,18 @@ interface State {
   isDisplaying: boolean;
   displayData: JSX.Element[];
   isLoading: boolean;
+  isScrollLoadEnabled: boolean;
 }
 
+
+
 class AutofeaturedApp extends React.Component<Props, State> {
+  showMbtnRef: RefObject<HTMLAnchorElement>;
 
   constructor(props: Props, state: State) {
     super(props);
+
+    this.showMbtnRef = React.createRef();
 
     this.state = {
       selectedTab: autofeatured_str,
@@ -33,7 +39,8 @@ class AutofeaturedApp extends React.Component<Props, State> {
       autof_settings: undefined,
       isDisplaying: false,
       displayData: [],
-      isLoading: false
+      isLoading: false,
+      isScrollLoadEnabled: false
     }
   }
 
@@ -68,6 +75,25 @@ class AutofeaturedApp extends React.Component<Props, State> {
     //console.log('isSearchPage', isSearchPage, 'isCatPage', isCatPage, 'isProductPage', isProductPage, 'prodId', prodId);
     //console.log('autof_settings', autof_settings);
 
+    // Debug mode
+    (window as any).AutofeaturedApp = this;
+
+    // Set auto load on scroll
+    window.addEventListener('scroll', () => {
+      if (this.showMbtnRef.current) {
+        let btn_rect = this.showMbtnRef.current.getBoundingClientRect();
+        if (btn_rect.top > 2500) {
+          this.setState({ isScrollLoadEnabled: true })
+        }
+        if (btn_rect.top < 1500 && this.state.isScrollLoadEnabled) {
+          this.loadAutoFeatured();
+          this.setState({ isScrollLoadEnabled: false });
+        }
+      }
+    });
+
+    // Save all data
+
     let isDisplaying = true;
     if (!prodId || !autof_settings) {
       console.log('loadAutoFeatured: Invalid settings');
@@ -87,8 +113,6 @@ class AutofeaturedApp extends React.Component<Props, State> {
         displayData: []
       }, this.loadAutoFeatured);
     }
-    // Debug mode
-    (window as any).AutofeaturedApp = this;
   }
 
 
@@ -99,7 +123,7 @@ class AutofeaturedApp extends React.Component<Props, State> {
       return;
     }
 
-    this.setState({isLoading: true});
+    this.setState({ isLoading: true });
 
     let request_url = '';
     if (this.state.selectedTab === autofeatured_str) {
@@ -145,13 +169,14 @@ class AutofeaturedApp extends React.Component<Props, State> {
       this.setState((prevState) => {
         let disArr = prevState.displayData;
 
-        products.forEach( prod => {
+        products.forEach(prod => {
           disArr.push(prod);
         })
 
         return {
           displayData: disArr,
-          productsLoaded: prevState.productsLoaded + 40
+          productsLoaded: prevState.productsLoaded + 40,
+          isLoading: false
         };
       }, imgLazyLoadInit)
     }
@@ -212,21 +237,24 @@ class AutofeaturedApp extends React.Component<Props, State> {
       return (
         <div className="row">
           <h3 className="row autofeaturedText ">
-            <a id="autofeatured_btn" 
-            className={autofeatured_btn_cls} 
-            onClick={this.changeTabHandler}
-            key="1">Рекомендуемые товары</a>
-            <a id="imagematch_btn" 
-            className={imagematch_btn_cls} 
-            onClick={this.changeTabHandler}
-            key="2">Визуально похожие товары</a>
+            <a id="autofeatured_btn"
+              className={autofeatured_btn_cls}
+              onClick={this.changeTabHandler}
+              key="1">Рекомендуемые товары</a>
+            <a id="imagematch_btn"
+              className={imagematch_btn_cls}
+              onClick={this.changeTabHandler}
+              key="2">Визуально похожие товары</a>
           </h3>
 
-          <div className="row" 
-          id="products-load-container">{this.state.displayData}</div>
+          <div className="row"
+            id="products-load-container">{this.state.displayData}</div>
 
           <div id="showmore" className="showmoreBtn col-sm-12">
-            <a id="showmore-text-btn" onClick={this.loadAutoFeatured} style={btnCSS}>Показать еще</a>
+            <a id="showmore-text-btn"
+              onClick={this.loadAutoFeatured}
+              style={btnCSS}
+              ref={this.showMbtnRef} >Показать еще</a>
             <img id="load-more-gif" style={loaderCSS} src="image/loading.gif" />
           </div>
 

@@ -107,12 +107,13 @@ class PageHandler {
             return;
         }
 
-        window.history.pushState(null, $next.innerText, $next.attr('href'));
 
         $.get($next.attr('href'), (data) => {
             this.stopLoadingAnimation();
 
-            $data = $(data);
+            window.history.pushState(null, $next.innerText, $next.attr('href'));
+
+            var $data = $(data);
             let products = $data.find('.product-layout');
             let productsArr = Array.from(products);
 
