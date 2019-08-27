@@ -145,6 +145,8 @@ class AutofeaturedApp extends React.Component<Props, State> {
       .then((text) => text.length ? displayData(text) : displayData('responce failed'))
       .catch((error) => {
         console.log('err:', error);
+        this.setState({ isLoading: false });
+        if (this.showMbtnRef.current) this.showMbtnRef.current.style.display = 'none';
       });
 
     let displayData = (text: string) => {

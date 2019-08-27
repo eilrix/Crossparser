@@ -126,21 +126,11 @@ class PageHandler {
 
             }
             var $container = $('#res-products .row:first-child');
-            //$container.append($data.find('#res-products .row:first-child'));
             $container.append(productsArr);
-            //$("img.lazy").lazyload();
             $('.pagination').html($data.find('.pagination > *'));
             if ($('.pagination li.active').next('li').children('a').length == 0) {
                 $('#showmore').hide();
             }
-
-            $data.filter('script').each( () => {
-                if ((this.text || this.textContent || this.innerHTML).indexOf("document.write") >= 0) {
-                    return;
-                }
-                $.globalEval(this.text || this.textContent || this.innerHTML || '');
-            });
-            //$('html, body').animate({ scrollTop: $container.offset().top - 10 }, 'slow');
 
             var paginationTop = this.paginationTop;
 
@@ -188,8 +178,7 @@ class PageHandler {
             return;
         }
         var button = document.getElementById('showmore-text-btn').getBoundingClientRect();
-        window.onscroll = () => {
-
+        window.addEventListener('scroll', () => {
             if (document.getElementById('showmore-text-btn') == null) {
                 console.log('autoLoadInScroll error');
                 return;
@@ -200,7 +189,6 @@ class PageHandler {
             }
             if (button.top < 1500 && flag) {
                 if (this.isProductPage || this.fewProdsInCategory) {
-                    this.loadAutoFeatured();
                     flag = false
                     return;
                 }
@@ -211,228 +199,22 @@ class PageHandler {
             if (jQuery(window).width() > 992) {
                 if (!this.isProductPage) this.attachMFandCategs();
             }
-        };
+        });
     }
 
     loadMoreIfNotEnough() {
 
-        /////////  temp
-        return;
-
-        if (document.getElementById('autofeatured_settings') && this.autof_settings == '') {
-            this.autof_settings = document.getElementById('autofeatured_settings').innerText;
-        }
-
-        if (this.isProductPage) {
-            this.prodId = document.getElementById('LoadMoreHere').innerText;
-            document.getElementById('LoadMoreHere').innerText = "";
-
-            $("#LoadMoreHere").append('<h3 class="autofeaturedText" class="autofeatured-selected"><a id="autofeatured_btn">Рекомендуемые товары</a><a id="imagematch_btn">Визуально похожие товары</a></h3>');
-            $("#LoadMoreHere").after('<div id="showmore" class="showmoreBtn col-sm-12" style="padding-top: 15px;"><a id="showmore-text-btn" onclick="pageHandler.loadAutoFeatured()">Показать еще</a><img id="load-more-gif"  style="display: none; margin: 0px auto;" src="image/loading.gif"></div>');
-
-            // imagematch switch
-            $('#autofeatured_btn').addClass('autofeatured-selected');
-
-            $('#imagematch_btn').click(() => {
-                $('.row.autofeatured').remove();
-                $('#imagematch_btn').addClass('autofeatured-selected');
-                $('#autofeatured_btn').removeClass('autofeatured-selected');
-                this.loadImgMatch();
-            })
-            $('#autofeatured_btn').click(() => {
-                $('.row.autofeatured').remove();
-                $('#imagematch_btn').removeClass('autofeatured-selected');
-                $('#autofeatured_btn').addClass('autofeatured-selected');
-                this.productsLoaded = 0;
-                this.autoLoadInScroll();
-                this.loadAutoFeatured();
-            })
-
-            this.autoLoadInScroll();
-            this.loadAutoFeatured();
-            return;
-        }
-        //Category or search page:
-        if (jQuery(window).width() > 992) {
-            window.onscroll = () => {
-                if (!this.isProductPage) this.attachMFandCategs();
-            }
-        }
+        if (this.isProductPage) return;
 
         let productsList = document.querySelectorAll('#res-products .row .product-layout');
         let productArr = Array.from(productsList);
         //console.log(productArr.length);
-        if (!productsList) return;
+        if (productArr.length == 0) return;
         if (productArr.length > 30) { this.autoLoadInScroll(); }
 
         this.storeClassesOfProd = productArr[0].classList;
-
-        if (productArr.length < 20) {
-            this.fewProdsInCategory = true;
-
-            let linkProdOncl = productArr[0].querySelector('.quick-view a').getAttribute('onclick');
-            this.prodId = linkProdOncl.split('(')[1].replace("'", "").replace("')", "").replace(";", "");
-            //console.log(this.prodId);
-
-            this.loadAutoFeatured();
-
-            $('.container .content-row').append('<h3 class="autofeaturedText">Похожие товары</h3>');
-        }
-
-
     }
 
-
-    loadAutoFeatured() {
-
-
-        if (!this.isProductPage) {
-            // Only in cat and search page. Get first product id
-            let productsList = document.querySelectorAll('#res-products .row .product-layout');
-            let productArr = Array.from(productsList);
-            let linkProdOncl = productArr[0].querySelector('.quick-view a').getAttribute('onclick');
-            this.prodId = linkProdOncl.split('(')[1].replace("'", "").replace("')", "").replace(";", "");
-        }
-
-        console.log('prodId: ', this.prodId, 'productsLoaded: ', this.productsLoaded);
-        console.log('autof_settings', this.autof_settings);
-
-
-        let dataSend = {
-            'autof_settings': this.autof_settings,
-            'prodId': this.prodId,
-            'productsLoaded': this.productsLoaded
-        };
-        this.startLoadingAnimation();
-
-        $.ajax({
-            type: "POST",
-            url: 'index.php?route=extension/module/autofeatured/ajaxGetProduct',
-            data: dataSend
-        }).done((data) => {
-            console.log('post: ', data);
-            this.stopLoadingAnimation();
-
-            if (this.isProductPage) {
-                $("#LoadMoreHere").append(data);
-                return;
-            }
-            $('.container .content-row').append(data);
-            if (this.firstFlagLoadAutoFeatured) {
-                this.firstFlagLoadAutoFeatured = false;
-                $('footer').before('<div id="showmore" class="showmoreBtn" style="padding-top: 15px;"><a id="showmore-text-btn" onclick="loadAutoFeatured()">Показать еще</a><img id="load-more-gif"  style="display: none; margin: 0px auto;" src="image/loading.gif"></div>');
-                this.autoLoadInScroll();
-            }
-        });
-
-        this.productsLoaded += 40;
-
-    }
-
-    loadImgMatch() {
-
-        if (this.isProductPage == null) {
-            let productsList = document.querySelectorAll('#res-products .row .product-layout');
-            let productArr = Array.from(productsList);
-            let linkProdOncl = productArr[0].querySelector('.quick-view a').getAttribute('onclick');
-            this.prodId = linkProdOncl.split('(')[1].replace("'", "").replace("')", "").replace(";", "");
-        }
-        var prod_sku = $('#product > div:nth-child(7) > span.product-sizes-span').text();
-        console.log('prodId: ', this.prodId, 'productsLoaded: ', this.productsLoaded);
-        console.log('autof_settings', this.autof_settings);
-
-
-        let dataSend = {
-            'autof_settings': this.autof_settings,
-            'prodId': prod_sku,
-            'productsLoaded': this.productsLoaded
-        };
-        this.startLoadingAnimation();
-
-        $.ajax({
-            type: "POST",
-            url: 'index.php?route=extension/module/autofeatured/ajaxGetImgMatched',
-            data: dataSend
-        }).done( (data) => {
-            console.log('post: ', data);
-            this.stopLoadingAnimation();
-
-            if (this.isProductPage) {
-                $("#LoadMoreHere").append(data);
-                return;
-            }
-            $('.container .content-row').append(data);
-            if (this.firstFlagLoadAutoFeatured) {
-                this.firstFlagLoadAutoFeatured = false;
-                $('footer').before('<div id="showmore" class="showmoreBtn" style="padding-top: 15px;"><a id="showmore-text-btn" onclick="loadAutoFeatured()">Показать еще</a><img id="load-more-gif"  style="display: none; margin: 0px auto;" src="image/loading.gif"></div>');
-                this.autoLoadInScroll();
-            }
-        });
-
-        this.productsLoaded += 40;
-
-    }
-
-    customCallAutofeatured(prodId = 0, productsLoaded = 0, spawnBlock = '.container .content-row') {
-        window.onscroll = {};
-        let dataSend = {
-            //'settings' : settings,
-            'prodId': prodId,
-            'productsLoaded': productsLoaded
-        };
-        this.startLoadingAnimation();
-
-        $.ajax({
-            type: "POST",
-            url: 'index.php?route=extension/module/autofeatured/ajaxGetProduct',
-            data: dataSend
-        }).done( (data) => {
-            console.log('post: ', data);
-            this.stopLoadingAnimation();
-
-            if (this.isProductPage) {
-                $("#LoadMoreHere").append(data);
-                return;
-            }
-
-            $(spawnBlock).append(data);
-        }).fail(() => {
-            console.log("error");
-            this.stopLoadingAnimation();
-        })
-
-    }
-
-    customCallImgMatch(prodId = 0, productsLoaded = 0, spawnBlock = '.container .content-row') {
-        window.onscroll = {};
-
-        let dataSend = {
-            //'settings' : settings,
-            'prodId': prodId,
-            'productsLoaded': productsLoaded
-        };
-        this.startLoadingAnimation();
-
-        $.ajax({
-            type: "POST",
-            url: 'index.php?route=extension/module/autofeatured/ajaxGetImgMatched',
-            data: dataSend
-        }).done( (data) => {
-            console.log('post: ', data);
-            this.stopLoadingAnimation();
-
-            if (this.isProductPage) {
-                $("#LoadMoreHere").append(data);
-                return;
-            }
-
-            $(spawnBlock).append(data);
-        }).fail( () => {
-            console.log("error");
-            this.stopLoadingAnimation();
-        })
-
-    }
 
     lazyLoad() {
         $("img.lazy").lazyload();
