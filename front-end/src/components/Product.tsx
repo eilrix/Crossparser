@@ -13,18 +13,16 @@ class Product extends React.Component<Props, State> {
 
     render() {
 
-        let data = this.props.data;
+        const data = this.props.data;
 
-        let price;
-        if (!data.special) {
-            price = <span>{data.price}</span>
-        }
-        else {
-            price = <span>
-                        <span className="price-new">{data.special}</span>
-                        <span className="price-old">{data.price}</span>
-                    </span>
-        }
+        const price: JSX.Element = !data.special ? (
+            <span>{data.price}</span>
+        ) : (
+                <span>
+                    <span className="price-new">{data.special}</span>
+                    <span className="price-old">{data.price}</span>
+                </span>
+            );
 
         return (
             <div className="product-layout col-lg-3 col-md-3 col-sm-6 col-xs-12">

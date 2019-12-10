@@ -11,4 +11,10 @@ export default interface productData {
         "href": string;
 }
 
-export let autofeatured_str = 'autofeatured';
+export const autofeatured_str = 'autofeatured';
+
+export const autofeaturedIMGMatch_str = 'imgmatch';
+
+export const autofeaturedURL = 'index.php?route=extension/module/autofeatured/ajaxGetProduct';
+
+export const autofeaturedIMGMatchURL = 'index.php?route=extension/module/autofeatured/ajaxGetImgMatched';

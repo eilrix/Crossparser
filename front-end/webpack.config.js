@@ -1,6 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 
+const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
+
 /*
  * SplitChunksPlugin is enabled by default and replaced
  * deprecated CommonsChunkPlugin. It automatically identifies modules which
@@ -26,12 +28,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
  */
 
 module.exports = {
-	mode: 'development',
+	mode: mode,
 	entry: './src/index.tsx',
+	devtool: mode === 'development' ? 'inline-source-map' : 'none',
 
 	output: {
-		filename: '[name].[chunkhash].js',
-		path: path.resolve(__dirname, 'dist')
+		filename: 'showmore.js',
+		path: path.resolve(__dirname, mode === 'development' ? 'dev' : 'prod')
 	},
 
 	plugins: [		

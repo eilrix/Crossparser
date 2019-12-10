@@ -4,6 +4,8 @@ import {
     attachMFandCategs
 } from './megafilterPatch';
 
+var $ = require("jquery");
+
 
 class PageHandler {
 
