@@ -24,7 +24,7 @@ sys.setrecursionlimit(20000)
 credentials = crossparser_tools.parse_credentials()
 temp_folder = crossparser_tools.temp_folder
 config_folder = crossparser_tools.config_folder
-file_of_raw_catalogs = crossparser_tools.file_of_raw_catalogs
+file_of_raw_catalogs = crossparser_tools.file_of_raw_catalogs;
 
 websites = {}
 weblinks = {}
@@ -397,7 +397,8 @@ def parsnew():
 
         options = webdriver.ChromeOptions()
         #prefs = {"download.default_directory" : temp_folder, "download.prompt_for_download": False, "download.directory_upgrade": True, "safebrowsing.enabled": True }
-        temp_folder_downl = 'C:\\Work\\Crossparser\\temp'
+        
+        temp_folder_downl = temp_folder.replace('/', '\\')
         print(temp_folder_downl)
         prefs = {"download.default_directory" : temp_folder_downl, "download.prompt_for_download": False, "download.directory_upgrade": True, "safebrowsing.enabled": True }
         options.add_experimental_option("prefs", prefs)

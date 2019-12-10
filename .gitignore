@@ -2,7 +2,8 @@
 .vs/
 temp/
 data/
-source/__pycache__/
+CrossParser/__pycache__/
+CrossParser/source/__pycache__
 front-end/node_modules/
 front-end/dist/
 front-end/build/
